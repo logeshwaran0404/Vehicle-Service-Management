@@ -32,14 +32,14 @@ public class AuthenticationService {
             User user = (User) authentication.getPrincipal();
             
             String jwtToken = jwtUtil.generateToken(user);
-            
+
             return AuthenticationResponse.builder()
                     .token(jwtToken)
                     .userId(user.getUserId())
                     .email(user.getEmail())
                     .firstName(user.getFirstName())
                     .lastName(user.getLastName())
-                    .role(user.getRole())
+                    .role(user.getRole().name())
                     .build();
             
         } catch (AuthenticationException e) {
