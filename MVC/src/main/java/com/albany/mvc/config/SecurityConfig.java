@@ -25,13 +25,16 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Explicitly permit these paths without authentication
                         .requestMatchers("/admin/login", "/test-auth", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error").permitAll()
+                        // Require admin role for admin paths
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Any other request needs authentication
                         .anyRequest().authenticated()
                 )
                 // IMPORTANT: Use custom login controller instead of form login
                 .formLogin(form -> form
-                        .disable() // This is the key change
+                        .disable()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
@@ -40,7 +43,11 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID", "albany-auth-token")
                         .permitAll()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Add exception handling
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/admin/login?error=access_denied")
+                );
 
         return http.build();
     }
