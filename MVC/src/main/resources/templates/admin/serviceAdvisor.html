@@ -8,12 +8,12 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-  <!-- Google Fonts - Baloo Bhaijaan 2 & Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts - Baloo Bhaijaan 2 -->
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <style>
   :root {
-    --dutch-white: #EFFFBB;
+    --dutch-white: #EFFBBB; /* Dutch White */
     --dutch-white-light: #f5ffd4;
     --dutch-white-dark: #d6e297;
     --dutch-white-darker: #bfca85;
@@ -23,6 +23,7 @@
     --wine-darker: #491d23;
     --wine-gradient: linear-gradient(145deg, #722F37 0%, #5e262e 100%);
     --wine-gradient-hover: linear-gradient(145deg, #8a3943 0%, #722F37 100%);
+    --dutch-white-gradient: linear-gradient(145deg, #EFFFBB 0%, #d6e297 100%);
     --white: #ffffff;
     --light-bg: #f8f9fa;
     --light-gray: #e9ecef;
@@ -30,7 +31,7 @@
     --dark-gray: #495057;
     --danger: #ef5350;
     --warning: #ffca28;
-    --success: #66BB6a;
+    --success: #66bb6a;
     --info: #42a5f5;
 
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
@@ -41,7 +42,6 @@
     --radius-sm: 0.25rem;
     --radius-md: 0.5rem;
     --radius-lg: 1rem;
-    --radius-xl: 1.5rem;
 
     --transition: all 0.3s ease;
   }
@@ -53,8 +53,8 @@
   }
 
   body, html {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    background-color: #f0f2f5;
     color: var(--dark-gray);
     min-height: 100vh;
     scroll-behavior: smooth;
@@ -89,7 +89,7 @@
     min-height: 100vh;
   }
 
-  /* Sidebar Styles */
+  /* Sidebar Styles - Fixed visibility issues */
   .sidebar {
     width: 280px;
     background: var(--wine-gradient);
@@ -116,17 +116,28 @@
   .sidebar-header h2 {
     margin-bottom: 0;
     font-weight: 700;
-    color: var(--white);
+    color: var(--white); /* Fixed visibility issue */
     font-size: 1.75rem;
-    font-family: 'Baloo Bhaijaan 2', sans-serif;
     letter-spacing: 0.5px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Added for better visibility */
   }
 
   .sidebar-content {
     flex: 1;
     overflow-y: auto;
     padding: 1rem 0;
+  }
+
+  .sidebar-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   .nav-section {
@@ -138,7 +149,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 0.75rem 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.8); /* Improved visibility */
     font-weight: 600;
   }
 
@@ -157,7 +168,7 @@
     display: flex;
     align-items: center;
     padding: 0.85rem 1rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.95); /* Improved visibility */
     text-decoration: none;
     border-radius: var(--radius-md);
     transition: var(--transition);
@@ -195,6 +206,12 @@
     margin-right: 0.75rem;
   }
 
+  .sidebar-menu-link span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: inherit; /* Ensures text inherits color properly */
+  }
+
   .sidebar-footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -216,7 +233,7 @@
 
   .user-role {
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.8); /* Improved visibility */
   }
 
   .logout-btn {
@@ -245,7 +262,6 @@
     padding: 2rem;
     transition: var(--transition);
     color: var(--dark-gray);
-    background-color: #f0f2f5;
   }
 
   /* Header Styles */
@@ -254,7 +270,7 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     background-color: transparent;
     padding: 0;
     border-radius: 0;
@@ -272,11 +288,11 @@
 
   .header-left h1 {
     font-size: 2.5rem;
-    font-weight: 700;
-    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    font-weight: 800;
     color: var(--wine);
     margin-bottom: 0.5rem;
     position: relative;
+    text-transform: uppercase;
     letter-spacing: 1px;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
   }
@@ -326,7 +342,7 @@
     padding: 1.2rem 4rem 1.2rem 1.5rem;
     background-color: var(--white);
     border: none;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     color: var(--dark-gray);
     font-size: 1rem;
     transition: var(--transition);
@@ -372,7 +388,7 @@
   /* Premium Button */
   .btn-premium {
     padding: 1rem 2rem;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     font-size: 1rem;
     font-weight: 600;
     transition: var(--transition);
@@ -445,7 +461,7 @@
   /* Advisor Card Design - Professional Portfolio Style */
   .advisor-card {
     background-color: var(--white);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
     transition: var(--transition);
@@ -725,7 +741,7 @@
   /* Modal Styles - Premium Modern Design */
   .modal-premium .modal-content {
     border: none;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
     overflow: hidden;
   }
@@ -1024,7 +1040,7 @@
   /* Enhanced Success Modal */
   .success-modal .modal-content {
     border: none;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
     overflow: hidden;
     background-color: var(--white);
@@ -1125,7 +1141,7 @@
   .success-modal .continue-btn {
     padding: 1rem 3rem;
     font-size: 1.1rem;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     background: var(--wine-gradient);
     color: white;
     border: none;
@@ -1161,7 +1177,7 @@
     text-align: center;
     padding: 2rem;
     background-color: white;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
     max-width: 80%;
     width: 300px;
@@ -1220,7 +1236,7 @@
   /* Premium Termination Modal Styling */
   .termination-modal .modal-content {
     border: none;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
     background-color: #fff;
@@ -1445,7 +1461,7 @@
     background-color: #f8f9fa;
     color: #495057;
     border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     font-size: 0.95rem;
     font-weight: 500;
     transition: all 0.3s ease;
@@ -1466,7 +1482,7 @@
     background: linear-gradient(145deg, #ef5350, #d32f2f);
     color: white;
     border: none;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     font-size: 0.95rem;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -1486,7 +1502,7 @@
     background-color: #f8f9fa;
     color: #495057;
     border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     font-size: 0.95rem;
     font-weight: 500;
     transition: all 0.3s ease;
@@ -1507,7 +1523,7 @@
     background: linear-gradient(145deg, #d32f2f, #b71c1c);
     color: white;
     border: none;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     font-size: 0.95rem;
     font-weight: 600;
     transition: all 0.3s ease;
@@ -1640,47 +1656,94 @@
     border-radius: var(--radius-md);
   }
 
-  /* Modal Animation */
-  .termination-modal .modal-content {
-    animation: modalFadeIn 0.3s ease-out forwards;
+  /* Alert styles */
+  .custom-alert {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-md);
   }
 
-  @keyframes modalFadeIn {
+  .custom-alert.error {
+    background-color: rgba(239, 83, 80, 0.1);
+    border-left: 4px solid var(--danger);
+    color: #c62828;
+  }
+
+  .custom-alert.success {
+    background-color: rgba(102, 187, 106, 0.1);
+    border-left: 4px solid var(--success);
+    color: #2e7d32;
+  }
+
+  .custom-alert.warning {
+    background-color: rgba(255, 202, 40, 0.1);
+    border-left: 4px solid var(--warning);
+    color: #f57f17;
+  }
+
+  .alert-icon {
+    font-size: 1.5rem;
+  }
+
+  .alert-content {
+    flex: 1;
+  }
+
+  .alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+  }
+
+  .alert-message {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  /* Mobile menu toggle */
+  .mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1060;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--wine-gradient);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(114, 47, 55, 0.25);
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .mobile-menu-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(114, 47, 55, 0.3);
+  }
+
+  /* Animation for the success modal */
+  @keyframes slideInUp {
     from {
+      transform: translate3d(0, 40px, 0);
       opacity: 0;
-      transform: translateY(20px);
     }
     to {
+      transform: translate3d(0, 0, 0);
       opacity: 1;
-      transform: translateY(0);
     }
   }
 
-  /* Fade transition for the steps */
-  .termination-step-transition {
-    animation: stepTransition 0.3s ease-out forwards;
-  }
-
-  @keyframes stepTransition {
-    from {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  /* Error Animation */
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-  }
-
-  .shake {
-    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  .success-animation {
+    animation: slideInUp 0.4s ease-out forwards;
   }
 
   /* Responsive Design */
@@ -1768,12 +1831,49 @@
   }
 
   @media (max-width: 575.98px) {
+    .mobile-menu-toggle {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 0;
+      transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+      width: 16rem;
+      transform: translateX(0);
+    }
+
+    .sidebar.active .sidebar-header h2,
+    .sidebar.active .sidebar-menu-link span,
+    .sidebar.active .user-info,
+    .sidebar.active .nav-section-title,
+    .sidebar.active .logout-btn span {
+      display: block;
+    }
+
+    .sidebar.active .sidebar-menu-link {
+      justify-content: flex-start;
+      padding: 0.85rem 1rem;
+    }
+
+    .sidebar.active .sidebar-menu-link i {
+      margin-right: 0.75rem;
+    }
+
+    .sidebar.active .logout-btn {
+      padding: 0.5rem 1rem;
+      justify-content: space-between;
+    }
+
     .main-content {
+      margin-left: 0;
       padding: 1.5rem;
     }
 
     .page-header {
-      margin-bottom: 1.5rem;
+      margin-top: 3rem;
     }
 
     .header-left h1 {
@@ -1794,27 +1894,16 @@
       flex-direction: column;
     }
   }
-
-  /* Animation for the success modal */
-  @keyframes slideInUp {
-    from {
-      transform: translate3d(0, 40px, 0);
-      opacity: 0;
-    }
-    to {
-      transform: translate3d(0, 0, 0);
-      opacity: 1;
-    }
-  }
-
-  .success-animation {
-    animation: slideInUp 0.4s ease-out forwards;
-  }
 </style>
 <body>
 <div class="app-container">
+  <!-- Mobile Menu Toggle Button (for small screens) -->
+  <button class="mobile-menu-toggle" id="mobileMenuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
+
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h2>Albany</h2>
     </div>
@@ -1854,7 +1943,7 @@
             </a>
           </li>
           <li class="sidebar-menu-item">
-            <a th:href="@{/admin/service-advisors}" class="sidebar-menu-link">
+            <a th:href="@{/admin/service-advisors}" class="sidebar-menu-link active">
               <i class="fas fa-user-tie"></i>
               <span>Service Advisors</span>
             </a>
@@ -1889,10 +1978,10 @@
 
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-name" th:text="${session.userName}">Admin User</div>
+        <div class="user-name">Arthur Morgan</div>
         <div class="user-role">Administrator</div>
       </div>
-      <button class="logout-btn">
+      <button class="logout-btn" id="logoutBtn">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>
       </button>
@@ -1907,15 +1996,29 @@
         <h1>Service Advisor Management</h1>
         <div class="current-date">
           <i class="far fa-calendar-alt"></i>
-          <span id="current-date">Wednesday, March 26, 2025</span>
+          <span id="current-date">Loading date...</span>
         </div>
       </div>
     </header>
 
+    <!-- Error/Success Alerts -->
+    <div id="alertContainer">
+      <!-- Will be populated dynamically if needed -->
+      <div th:if="${apiError}" class="custom-alert error">
+        <div class="alert-icon">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="alert-content">
+          <div class="alert-title">Error</div>
+          <div class="alert-message" th:text="${apiError}">Error message will appear here</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Action Bar -->
     <section class="action-bar">
       <div class="search-container">
-        <input type="text" class="search-input" placeholder="Search by name, department, or specialization...">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by name, department, or specialization...">
         <button class="search-btn">
           <i class="fas fa-search"></i>
         </button>
@@ -1930,97 +2033,17 @@
     </section>
 
     <!-- Advisors Grid - Portfolio Style -->
-    <section class="advisors-grid">
-      <!-- Loop through serviceAdvisors from the model -->
-      <div th:each="advisor : ${serviceAdvisors}" class="advisor-card">
-        <div class="advisor-image-container">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service Advisor" class="advisor-image">
-          <div class="advisor-id-badge">
-            <i class="fas fa-id-badge"></i>
-            <span th:text="'SA-' + ${advisor.advisorId}">SA-1023</span>
-          </div>
-        </div>
-        <div class="advisor-content">
-          <div class="advisor-header">
-            <h3 class="advisor-name" th:text="${advisor.firstName + ' ' + advisor.lastName}">John Doe</h3>
-            <div class="advisor-title">
-              <i class="fas fa-tools"></i>
-              <span th:text="${advisor.specialization}">Vehicle Diagnostics Specialist</span>
-            </div>
-          </div>
+    <section class="advisors-grid" id="advisorsGrid">
+      <!-- Will be populated dynamically with JavaScript -->
 
-          <div class="advisor-details">
-            <div class="detail-item">
-              <div class="detail-icon">
-                <i class="fas fa-building"></i>
-              </div>
-              <div class="detail-text">
-                <div class="detail-label">Department</div>
-                <div class="detail-value" th:text="${advisor.department}">Service Department</div>
-              </div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-icon">
-                <i class="fas fa-phone-alt"></i>
-              </div>
-              <div class="detail-text">
-                <div class="detail-label">Contact</div>
-                <div class="detail-value" th:text="${advisor.phoneNumber}">+91 98765 43210</div>
-              </div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-icon">
-                <i class="fas fa-envelope"></i>
-              </div>
-              <div class="detail-text">
-                <div class="detail-label">Email</div>
-                <div class="detail-value" th:text="${advisor.email}">advisor@albany.com</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="advisor-workload">
-            <div class="workload-header">
-              <div class="workload-title">
-                <i class="fas fa-tasks"></i>
-                Current Workload
-              </div>
-              <div th:class="${advisor.workloadPercentage lt 40 ? 'workload-percent low' : (advisor.workloadPercentage lt 70 ? 'workload-percent medium' : 'workload-percent high')}"
-                   th:text="${advisor.workloadPercentage + '%'}">65%</div>
-            </div>
-            <div class="progress">
-              <div th:class="${advisor.workloadPercentage lt 40 ? 'progress-bar low' : (advisor.workloadPercentage lt 70 ? 'progress-bar medium' : 'progress-bar high')}"
-                   th:style="'width: ' + ${advisor.workloadPercentage} + '%'"></div>
-            </div>
-            <div class="workload-info">
-              <div class="active-services">
-                <i class="fas fa-car-side"></i>
-                <span th:text="${advisor.activeServices + ' ' + (advisor.activeServices eq 1 ? 'vehicle' : 'vehicles') + ' in service'}">4 vehicles in service</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="advisor-actions">
-            <button class="btn-view" data-bs-toggle="modal" data-bs-target="#vehiclesModal"
-                    th:data-advisor="${advisor.firstName + ' ' + advisor.lastName}">
-              <i class="fas fa-eye"></i> View Vehicles
-            </button>
-            <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editAdvisorModal"
-                    th:data-advisor-id="${advisor.advisorId}">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn-fire" data-bs-toggle="modal" data-bs-target="#fireAdvisorModal"
-                    th:data-advisor-id="${advisor.advisorId}">
-              <i class="fas fa-user-slash"></i> Fire
-            </button>
-          </div>
-        </div>
+      <!-- Loading placeholder shown until data is loaded -->
+      <div id="loadingPlaceholder" class="text-center py-5">
+        <div class="spinner"></div>
+        <h5 class="mt-3">Loading service advisors...</h5>
       </div>
 
-      <!-- Display message if no advisors -->
-      <div th:if="${#lists.isEmpty(serviceAdvisors)}" class="text-center py-5">
+      <!-- Empty state message - shown when no advisors exist -->
+      <div id="emptyState" class="text-center py-5" style="display: none;">
         <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
         <h5>No service advisors found</h5>
         <p class="text-muted">Add your first service advisor to get started</p>
@@ -2050,7 +2073,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="addAdvisorForm" th:action="@{/admin/service-advisors}" method="post">
+        <form id="addAdvisorForm">
           <!-- Profile Image Upload -->
           <div class="text-center mb-4">
             <div class="image-preview">
@@ -2422,38 +2445,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- Sample vehicles - would be replaced with dynamic data -->
         <div id="advisorVehicles">
-          <div class="vehicle-card">
-            <div class="vehicle-icon">
-              <i class="fas fa-car"></i>
-            </div>
-            <div class="vehicle-info">
-              <h4 class="vehicle-name">Toyota Camry</h4>
-              <div class="vehicle-details">
-                <div class="vehicle-detail"><i class="fas fa-id-card"></i> Reg: KA01MH4759</div>
-                <div class="vehicle-detail"><i class="fas fa-user"></i> Owner: Ramesh Joshi</div>
-              </div>
-            </div>
-            <div class="vehicle-status progress">
-              <i class="fas fa-spinner"></i> In Progress
-            </div>
+          <!-- Will be populated dynamically -->
+          <div class="text-center py-4" id="vehiclesLoading">
+            <div class="spinner" style="margin: 0 auto;"></div>
+            <p class="mt-3">Loading vehicles...</p>
           </div>
 
-          <div class="vehicle-card">
-            <div class="vehicle-icon">
-              <i class="fas fa-car-side"></i>
-            </div>
-            <div class="vehicle-info">
-              <h4 class="vehicle-name">Honda City</h4>
-              <div class="vehicle-details">
-                <div class="vehicle-detail"><i class="fas fa-id-card"></i> Reg: MH02AB7841</div>
-                <div class="vehicle-detail"><i class="fas fa-user"></i> Owner: Priya Sharma</div>
-              </div>
-            </div>
-            <div class="vehicle-status progress">
-              <i class="fas fa-spinner"></i> In Progress
-            </div>
+          <div class="text-center py-4" id="noVehiclesMessage" style="display: none;">
+            <i class="fas fa-car fa-3x text-muted mb-3"></i>
+            <h5>No vehicles assigned</h5>
+            <p class="text-muted">This service advisor currently has no vehicles assigned.</p>
           </div>
         </div>
       </div>
@@ -2503,54 +2505,36 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize admin name from storage
-    initializeAdminInfo();
+    // Initialize the application
+    initializeApp();
 
-    // Display current date
-    displayCurrentDate();
-
-    // Set up event listeners
+    // Setup event listeners
     setupEventListeners();
 
-    // Load service advisors from API
+    // Load service advisors
     loadServiceAdvisors();
   });
 
   // ----------------------------------------
-  // User Authentication & Admin Info
+  // Global variables
   // ----------------------------------------
 
-  function initializeAdminInfo() {
-    // Get user name from storage (set during login)
-    const firstName = sessionStorage.getItem('user-first-name') || localStorage.getItem('user-first-name') || '';
-    const lastName = sessionStorage.getItem('user-last-name') || localStorage.getItem('user-last-name') || '';
+  let serviceAdvisors = []; // Will store the list of service advisors
 
-    if (firstName && lastName) {
-      document.querySelector('.user-name').textContent = `${firstName} ${lastName}`;
-    }
+  // ----------------------------------------
+  // App Initialization
+  // ----------------------------------------
 
-    // Set logout event
-    document.querySelector('.logout-btn').addEventListener('click', function() {
-      // Clear storage
-      sessionStorage.removeItem('jwt-token');
-      localStorage.removeItem('jwt-token');
-      sessionStorage.removeItem('user-first-name');
-      localStorage.removeItem('user-first-name');
-      sessionStorage.removeItem('user-last-name');
-      localStorage.removeItem('user-last-name');
+  function initializeApp() {
+    // Display current date
+    displayCurrentDate();
 
-      // Redirect to login page
-      window.location.href = '/admin/logout';
-    });
+    // Setup mobile menu toggle
+    setupMobileMenu();
+
+    // Setup logout functionality
+    setupLogout();
   }
-
-  function getToken() {
-    return sessionStorage.getItem('jwt-token') || localStorage.getItem('jwt-token');
-  }
-
-  // ----------------------------------------
-  // Helper Functions
-  // ----------------------------------------
 
   function displayCurrentDate() {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -2558,61 +2542,78 @@
     document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', options);
   }
 
-  function showLoading(message = "Processing your request...") {
-    document.getElementById('loadingText').textContent = message;
-    document.getElementById('loadingSpinner').style.display = 'flex';
+  function setupMobileMenu() {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (mobileMenuToggle) {
+      mobileMenuToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+      });
+    }
   }
 
-  function hideLoading() {
-    document.getElementById('loadingSpinner').style.display = 'none';
-  }
+  function setupLogout() {
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      // Clear storage
+      localStorage.removeItem("jwt-token");
+      sessionStorage.removeItem("jwt-token");
 
-  function showSuccess(message) {
-    document.getElementById('successMessage').textContent = message;
-    const modal = new bootstrap.Modal(document.getElementById('successModal'));
-    modal.show();
+      // Redirect to logout
+      window.location.href = '/admin/logout';
+    });
   }
 
   // ----------------------------------------
-  // Event Listeners Setup
+  // Event Listeners
   // ----------------------------------------
 
   function setupEventListeners() {
-    // Search functionality
-    setupSearch();
-
     // Add advisor form submission
     setupAddAdvisorForm();
 
-    // Fire advisor setup
-    setupFireAdvisorModal();
-
-    // Edit advisor setup
+    // Edit advisor form submission
     setupEditAdvisorForm();
 
-    // Profile image upload
-    setupProfileImageUpload();
+    // Fire advisor functionality
+    setupFireAdvisorModal();
 
     // View vehicles modal
     setupVehiclesModal();
+
+    // Search functionality
+    setupSearch();
+
+    // Profile image upload
+    setupProfileImageUpload();
   }
 
   function setupSearch() {
-    document.querySelector('.search-input').addEventListener('keyup', function() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', function() {
       const searchTerm = this.value.toLowerCase();
-      const advisorCards = document.querySelectorAll('.advisor-card');
 
-      advisorCards.forEach(card => {
-        const name = card.querySelector('.advisor-name').textContent.toLowerCase();
-        const department = card.querySelector('.detail-value').textContent.toLowerCase();
-        const specialization = card.querySelectorAll('.detail-value')[2].textContent.toLowerCase();
+      // If no search term, show all advisors
+      if (!searchTerm) {
+        renderAdvisors(serviceAdvisors);
+        return;
+      }
 
-        if (name.includes(searchTerm) || department.includes(searchTerm) || specialization.includes(searchTerm)) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
+      // Filter advisors based on search term
+      const filteredAdvisors = serviceAdvisors.filter(advisor => {
+        const fullName = `${advisor.firstName} ${advisor.lastName}`.toLowerCase();
+        const department = advisor.department ? advisor.department.toLowerCase() : '';
+        const specialization = advisor.specialization ? advisor.specialization.toLowerCase() : '';
+        const email = advisor.email ? advisor.email.toLowerCase() : '';
+
+        return fullName.includes(searchTerm) ||
+                department.includes(searchTerm) ||
+                specialization.includes(searchTerm) ||
+                email.includes(searchTerm);
       });
+
+      // Render filtered advisors
+      renderAdvisors(filteredAdvisors);
     });
   }
 
@@ -2626,13 +2627,13 @@
 
           // Check file size (max 5MB)
           if (file.size > 5 * 1024 * 1024) {
-            alert('File size must be less than 5MB');
+            showAlert('error', 'File size must be less than 5MB');
             return;
           }
 
           // Check file type
           if (!file.type.match('image.*')) {
-            alert('Only image files are allowed');
+            showAlert('error', 'Only image files are allowed');
             return;
           }
 
@@ -2683,66 +2684,79 @@
   }
 
   // ----------------------------------------
-  // API Interactions
+  // API Interaction Functions
   // ----------------------------------------
 
-  function loadServiceAdvisors() {
-    showLoading('Loading service advisors...');
+  function getToken() {
+    return sessionStorage.getItem('jwt-token') || localStorage.getItem('jwt-token');
+  }
 
-    fetch('/admin/service-advisors', {
+  function loadServiceAdvisors() {
+    showSpinner('Loading service advisors...');
+
+    fetch('/admin/api/advisors', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + getToken()
+        'Authorization': 'Bearer ' + getToken(),
+        'X-Requested-With': 'XMLHttpRequest'
       }
     })
             .then(response => {
               if (response.status === 401) {
-                // Session expired
                 window.location.href = '/admin/login?error=session_expired';
                 throw new Error('Session expired');
               }
 
-              if (!response.ok) {
-                throw new Error('Error fetching service advisors');
-              }
-
               return response.json();
             })
-            .then(advisors => {
-              renderAdvisors(advisors);
-              hideLoading();
+            .then(data => {
+              hideSpinner();
+
+              // Store the service advisors in the global variable
+              serviceAdvisors = data;
+
+              // Render the service advisors
+              renderAdvisors(serviceAdvisors);
             })
             .catch(error => {
-              console.error('Error:', error);
-              hideLoading();
+              hideSpinner();
+              console.error('Error loading service advisors:', error);
 
               if (error.message !== 'Session expired') {
-                alert('Failed to load service advisors. Please try again.');
+                showAlert('error', 'Failed to load service advisors. Please refresh and try again.');
               }
+
+              // Show empty state
+              document.getElementById('loadingPlaceholder').style.display = 'none';
+              document.getElementById('emptyState').style.display = 'block';
             });
   }
 
   function renderAdvisors(advisors) {
-    const container = document.querySelector('.advisors-grid');
+    const container = document.getElementById('advisorsGrid');
 
-    // Clear existing content
-    container.innerHTML = '';
+    // Hide loading placeholder
+    document.getElementById('loadingPlaceholder').style.display = 'none';
 
-    if (advisors && advisors.length > 0) {
-      advisors.forEach(advisor => {
-        container.appendChild(createAdvisorCard(advisor));
-      });
-    } else {
-      // No advisors found
-      container.innerHTML = `
-      <div class="text-center py-5">
-        <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
-        <h5>No service advisors found</h5>
-        <p class="text-muted">Add your first service advisor to get started</p>
-      </div>
-    `;
+    // Clear any existing content (except loading and empty state)
+    const advisorCards = container.querySelectorAll('.advisor-card');
+    advisorCards.forEach(card => card.remove());
+
+    // If no advisors found, show empty state
+    if (!advisors || advisors.length === 0) {
+      document.getElementById('emptyState').style.display = 'block';
+      return;
     }
+
+    // Hide empty state if we have advisors
+    document.getElementById('emptyState').style.display = 'none';
+
+    // Create and append advisor cards
+    advisors.forEach(advisor => {
+      const advisorCard = createAdvisorCard(advisor);
+      container.appendChild(advisorCard);
+    });
   }
 
   function createAdvisorCard(advisor) {
@@ -2756,98 +2770,106 @@
     // Format advisor ID
     const formattedId = advisor.formattedId || `SA-${String(advisor.advisorId).padStart(3, '0')}`;
 
+    // Get advisor initials
+    const firstInitial = advisor.firstName ? advisor.firstName.charAt(0) : '';
+    const lastInitial = advisor.lastName ? advisor.lastName.charAt(0) : '';
+    const initials = firstInitial + lastInitial;
+
     tempDiv.innerHTML = `
-    <div class="advisor-card">
-      <div class="advisor-image-container">
-        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service Advisor" class="advisor-image">
-        <div class="advisor-id-badge">
-          <i class="fas fa-id-badge"></i>
-          <span>${formattedId}</span>
+      <div class="advisor-card">
+        <div class="advisor-image-container">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service Advisor" class="advisor-image">
+          <div class="advisor-id-badge">
+            <i class="fas fa-id-badge"></i>
+            <span>${formattedId}</span>
+          </div>
+        </div>
+        <div class="advisor-content">
+          <div class="advisor-header">
+            <h3 class="advisor-name">${advisor.firstName} ${advisor.lastName}</h3>
+            <div class="advisor-title">
+              <i class="fas fa-tools"></i>
+              <span>${advisor.specialization || 'General Service Advisor'}</span>
+            </div>
+          </div>
+
+          <div class="advisor-details">
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="detail-text">
+                <div class="detail-label">Department</div>
+                <div class="detail-value">${advisor.department || 'Service Department'}</div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="fas fa-phone-alt"></i>
+              </div>
+              <div class="detail-text">
+                <div class="detail-label">Contact</div>
+                <div class="detail-value">${advisor.phoneNumber || 'Not provided'}</div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="detail-text">
+                <div class="detail-label">Email</div>
+                <div class="detail-value">${advisor.email}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="advisor-workload">
+            <div class="workload-header">
+              <div class="workload-title">
+                <i class="fas fa-tasks"></i>
+                Current Workload
+              </div>
+              <div class="workload-percent ${workloadClass}">${advisor.workloadPercentage}%</div>
+            </div>
+            <div class="progress">
+              <div class="progress-bar ${workloadClass}" style="width: ${advisor.workloadPercentage}%"></div>
+            </div>
+            <div class="workload-info">
+              <div class="active-services">
+                <i class="fas fa-car-side"></i>
+                <span>${advisor.activeServices} ${advisor.activeServices === 1 ? 'vehicle' : 'vehicles'} in service</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="advisor-actions">
+            <button class="btn-view" data-bs-toggle="modal" data-bs-target="#vehiclesModal"
+                    data-advisor-id="${advisor.advisorId}"
+                    data-advisor-name="${advisor.firstName} ${advisor.lastName}">
+              <i class="fas fa-eye"></i> View Vehicles
+            </button>
+            <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editAdvisorModal"
+                    data-advisor-id="${advisor.advisorId}">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn-fire" data-bs-toggle="modal" data-bs-target="#fireAdvisorModal"
+                    data-advisor-id="${advisor.advisorId}"
+                    data-advisor-name="${advisor.firstName} ${advisor.lastName}"
+                    data-advisor-initials="${initials}">
+              <i class="fas fa-user-slash"></i> Fire
+            </button>
+          </div>
         </div>
       </div>
-      <div class="advisor-content">
-        <div class="advisor-header">
-          <h3 class="advisor-name">${advisor.firstName} ${advisor.lastName}</h3>
-          <div class="advisor-title">
-            <i class="fas fa-tools"></i>
-            <span>${advisor.specialization}</span>
-          </div>
-        </div>
-
-        <div class="advisor-details">
-          <div class="detail-item">
-            <div class="detail-icon">
-              <i class="fas fa-building"></i>
-            </div>
-            <div class="detail-text">
-              <div class="detail-label">Department</div>
-              <div class="detail-value">${advisor.department}</div>
-            </div>
-          </div>
-
-          <div class="detail-item">
-            <div class="detail-icon">
-              <i class="fas fa-phone-alt"></i>
-            </div>
-            <div class="detail-text">
-              <div class="detail-label">Contact</div>
-              <div class="detail-value">${advisor.phoneNumber || 'Not provided'}</div>
-            </div>
-          </div>
-
-          <div class="detail-item">
-            <div class="detail-icon">
-              <i class="fas fa-envelope"></i>
-            </div>
-            <div class="detail-text">
-              <div class="detail-label">Email</div>
-              <div class="detail-value">${advisor.email}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="advisor-workload">
-          <div class="workload-header">
-            <div class="workload-title">
-              <i class="fas fa-tasks"></i>
-              Current Workload
-            </div>
-            <div class="workload-percent ${workloadClass}">${advisor.workloadPercentage}%</div>
-          </div>
-          <div class="progress">
-            <div class="progress-bar ${workloadClass}" style="width: ${advisor.workloadPercentage}%"></div>
-          </div>
-          <div class="workload-info">
-            <div class="active-services">
-              <i class="fas fa-car-side"></i>
-              <span>${advisor.activeServices} ${advisor.activeServices === 1 ? 'vehicle' : 'vehicles'} in service</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="advisor-actions">
-          <button class="btn-view" data-bs-toggle="modal" data-bs-target="#vehiclesModal"
-                  data-advisor="${advisor.firstName} ${advisor.lastName}">
-            <i class="fas fa-eye"></i> View Vehicles
-          </button>
-          <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editAdvisorModal"
-                  data-advisor-id="${advisor.advisorId}">
-            <i class="fas fa-edit"></i> Edit
-          </button>
-          <button class="btn-fire" data-bs-toggle="modal" data-bs-target="#fireAdvisorModal"
-                  data-advisor-id="${advisor.advisorId}">
-            <i class="fas fa-user-slash"></i> Fire
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
+    `;
 
     return tempDiv.firstElementChild;
   }
 
   // ----------------------------------------
-  // Add Advisor Functionality
+  // Form Functionality
   // ----------------------------------------
 
   function setupAddAdvisorForm() {
@@ -2864,7 +2886,7 @@
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (password !== confirmPassword) {
-        alert('Passwords do not match!');
+        showAlert('error', 'Passwords do not match!');
         return;
       }
 
@@ -2880,14 +2902,15 @@
       };
 
       // Show loading spinner
-      showLoading('Creating new service advisor...');
+      showSpinner('Creating new service advisor...');
 
-      // Send data to server
+      // Submit form data via AJAX
       fetch('/admin/service-advisors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + getToken()
+          'Authorization': 'Bearer ' + getToken(),
+          'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify(formData)
       })
@@ -2898,96 +2921,60 @@
                 }
 
                 if (!response.ok) {
-                  throw new Error('Server responded with an error');
+                  throw new Error(`Server responded with status: ${response.status}`);
                 }
+
                 return response.json();
               })
-              .then(data => {
-                hideLoading();
+              .then(newAdvisor => {
+                hideSpinner();
 
-                // Close modal
+                // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addAdvisorModal'));
                 modal.hide();
 
-                // Show success message
-                showSuccess('New service advisor has been successfully registered!');
+                // Reset the form
+                form.reset();
 
-                // Refresh the page to show the new advisor
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1500);
+                // Show success message
+                showSuccessModal('Service advisor created successfully!');
+
+                // Add the new advisor to the list and refresh the display
+                serviceAdvisors.push(newAdvisor);
+                renderAdvisors(serviceAdvisors);
               })
               .catch(error => {
-                hideLoading();
-                console.error('Error:', error);
+                hideSpinner();
+                console.error('Error creating service advisor:', error);
 
                 if (error.message !== 'Session expired') {
-                  alert('Failed to create service advisor. Please try again.');
+                  showAlert('error', 'Failed to create service advisor. Please try again.');
                 }
               });
     });
   }
 
-  // ----------------------------------------
-  // Edit Advisor Functionality
-  // ----------------------------------------
-
   function setupEditAdvisorForm() {
-    // Populate edit form when edit button is clicked
+    // Handle clicking the edit button
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('btn-edit') || e.target.closest('.btn-edit')) {
         const button = e.target.classList.contains('btn-edit') ? e.target : e.target.closest('.btn-edit');
         const advisorId = button.getAttribute('data-advisor-id');
 
-        // Show loading
-        showLoading('Loading advisor details...');
+        // Find the advisor in our cached list
+        const advisor = serviceAdvisors.find(a => a.advisorId == advisorId);
 
-        // Fetch advisor details
-        fetch(`/admin/service-advisors/${advisorId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getToken()
-          }
-        })
-                .then(response => {
-                  if (response.status === 401) {
-                    window.location.href = '/admin/login?error=session_expired';
-                    throw new Error('Session expired');
-                  }
-
-                  if (!response.ok) {
-                    throw new Error('Failed to load advisor details');
-                  }
-
-                  return response.json();
-                })
-                .then(advisor => {
-                  // Hide loading
-                  hideLoading();
-
-                  // Populate form fields
-                  document.getElementById('editAdvisorId').value = advisor.advisorId;
-                  document.getElementById('editUserId').value = advisor.userId;
-                  document.getElementById('editFirstName').value = advisor.firstName;
-                  document.getElementById('editLastName').value = advisor.lastName;
-                  document.getElementById('editEmail').value = advisor.email;
-                  document.getElementById('editPhone').value = advisor.phoneNumber || '';
-                  document.getElementById('editDepartment').value = advisor.department;
-                  document.getElementById('editSpecialization').value = advisor.specialization;
-                })
-                .catch(error => {
-                  hideLoading();
-                  console.error('Error fetching advisor details:', error);
-
-                  if (error.message !== 'Session expired') {
-                    alert('Failed to load advisor details');
-                  }
-                });
+        if (advisor) {
+          // Populate form fields
+          populateEditForm(advisor);
+        } else {
+          // Fetch advisor details from API if not found in cache
+          fetchAdvisorDetails(advisorId);
+        }
       }
     });
 
-    // Update advisor information
+    // Handle form submission
     document.getElementById('updateAdvisorBtn').addEventListener('click', function() {
       // Validate form
       const form = document.getElementById('editAdvisorForm');
@@ -3018,14 +3005,15 @@
       }
 
       // Show loading spinner
-      showLoading('Updating service advisor...');
+      showSpinner('Updating service advisor...');
 
-      // Send data to server
+      // Submit form data via AJAX
       fetch(`/admin/service-advisors/${advisorId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + getToken()
+          'Authorization': 'Bearer ' + getToken(),
+          'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify(formData)
       })
@@ -3036,39 +3024,102 @@
                 }
 
                 if (!response.ok) {
-                  throw new Error('Server responded with an error');
+                  throw new Error(`Server responded with status: ${response.status}`);
                 }
+
                 return response.json();
               })
-              .then(data => {
-                hideLoading();
+              .then(updatedAdvisor => {
+                hideSpinner();
 
-                // Close modal
+                // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editAdvisorModal'));
                 modal.hide();
 
                 // Show success message
-                showSuccess('Service advisor has been successfully updated!');
+                showSuccessModal('Service advisor updated successfully!');
 
-                // Refresh the page to show the updated advisor
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1500);
+                // Update the advisor in the list and refresh the display
+                const index = serviceAdvisors.findIndex(a => a.advisorId == advisorId);
+                if (index !== -1) {
+                  serviceAdvisors[index] = updatedAdvisor;
+                } else {
+                  serviceAdvisors.push(updatedAdvisor);
+                }
+
+                renderAdvisors(serviceAdvisors);
               })
               .catch(error => {
-                hideLoading();
-                console.error('Error:', error);
+                hideSpinner();
+                console.error('Error updating service advisor:', error);
 
                 if (error.message !== 'Session expired') {
-                  alert('Failed to update service advisor. Please try again.');
+                  showAlert('error', 'Failed to update service advisor. Please try again.');
                 }
               });
     });
   }
 
-  // ----------------------------------------
-  // Fire Advisor Functionality
-  // ----------------------------------------
+  function populateEditForm(advisor) {
+    document.getElementById('editAdvisorId').value = advisor.advisorId;
+    document.getElementById('editUserId').value = advisor.userId;
+    document.getElementById('editFirstName').value = advisor.firstName;
+    document.getElementById('editLastName').value = advisor.lastName;
+    document.getElementById('editEmail').value = advisor.email;
+    document.getElementById('editPhone').value = advisor.phoneNumber || '';
+    document.getElementById('editDepartment').value = advisor.department;
+    document.getElementById('editSpecialization').value = advisor.specialization;
+
+    // Clear password field
+    document.getElementById('editPassword').value = '';
+  }
+
+  function fetchAdvisorDetails(advisorId) {
+    showSpinner('Loading advisor details...');
+
+    fetch(`/admin/service-advisors/${advisorId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + getToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+            .then(response => {
+              if (response.status === 401) {
+                window.location.href = '/admin/login?error=session_expired';
+                throw new Error('Session expired');
+              }
+
+              if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+              }
+
+              return response.json();
+            })
+            .then(advisor => {
+              hideSpinner();
+
+              // Populate form fields
+              populateEditForm(advisor);
+
+              // Add to cache
+              const index = serviceAdvisors.findIndex(a => a.advisorId == advisorId);
+              if (index !== -1) {
+                serviceAdvisors[index] = advisor;
+              } else {
+                serviceAdvisors.push(advisor);
+              }
+            })
+            .catch(error => {
+              hideSpinner();
+              console.error('Error fetching advisor details:', error);
+
+              if (error.message !== 'Session expired') {
+                showAlert('error', 'Failed to load advisor details. Please try again.');
+              }
+            });
+  }
 
   function setupFireAdvisorModal() {
     // Populate fire modal when fire button is clicked
@@ -3076,20 +3127,16 @@
       if (e.target.classList.contains('btn-fire') || e.target.closest('.btn-fire')) {
         const button = e.target.classList.contains('btn-fire') ? e.target : e.target.closest('.btn-fire');
         const advisorId = button.getAttribute('data-advisor-id');
-        const card = button.closest('.advisor-card');
-        const advisorName = card.querySelector('.advisor-name').textContent;
-        const advisorIdDisplay = card.querySelector('.advisor-id-badge').textContent.trim();
+        const advisorName = button.getAttribute('data-advisor-name');
+        const advisorInitials = button.getAttribute('data-advisor-initials');
+        const formattedId = `SA-${String(advisorId).padStart(3, '0')}`;
 
         // Set values in the modal
         document.getElementById('fireAdvisorId').value = advisorId;
         document.getElementById('fireAdvisorName').textContent = advisorName;
         document.getElementById('confirmAdvisorName').textContent = advisorName;
-        document.getElementById('fireAdvisorIdDisplay').textContent = advisorIdDisplay;
-
-        // Set initials for avatar
-        const nameParts = advisorName.split(' ');
-        const initials = nameParts.map(part => part.charAt(0)).join('');
-        document.getElementById('fireAvatarInitial').textContent = initials;
+        document.getElementById('fireAdvisorIdDisplay').textContent = formattedId;
+        document.getElementById('fireAvatarInitial').textContent = advisorInitials;
 
         // Reset modal state
         document.getElementById('terminationStep1').style.display = 'block';
@@ -3128,17 +3175,19 @@
       const password = document.getElementById('adminPassword').value;
 
       // Simple password validation for demo
-      if (password === 'admin123') {
+      // In a real application, this should be validated on the server
+      if (password === 'admin@albany') {
         const advisorId = document.getElementById('fireAdvisorId').value;
 
         // Show loading spinner
-        showLoading('Processing termination...');
+        showSpinner('Processing termination...');
 
-        // Send deletion request
+        // Send deletion request via AJAX
         fetch(`/admin/service-advisors/${advisorId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': 'Bearer ' + getToken()
+            'Authorization': 'Bearer ' + getToken(),
+            'X-Requested-With': 'XMLHttpRequest'
           }
         })
                 .then(response => {
@@ -3148,51 +3197,180 @@
                   }
 
                   if (!response.ok) {
-                    throw new Error('Server responded with an error');
+                    throw new Error(`Server responded with status: ${response.status}`);
                   }
 
-                  hideLoading();
+                  hideSpinner();
 
-                  // Close modal
+                  // Close the modal
                   const modal = bootstrap.Modal.getInstance(document.getElementById('fireAdvisorModal'));
                   modal.hide();
 
                   // Show success message
-                  showSuccess('Service advisor has been successfully terminated.');
+                  showSuccessModal('Service advisor has been terminated successfully.');
 
-                  // Refresh the page to update the list
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 1500);
+                  // Remove the advisor from the list and refresh the display
+                  serviceAdvisors = serviceAdvisors.filter(a => a.advisorId != advisorId);
+                  renderAdvisors(serviceAdvisors);
                 })
                 .catch(error => {
-                  hideLoading();
-                  console.error('Error:', error);
+                  hideSpinner();
+                  console.error('Error terminating service advisor:', error);
 
                   if (error.message !== 'Session expired') {
-                    alert('Failed to terminate service advisor. Please try again.');
+                    showAlert('error', 'Failed to terminate service advisor. Please try again.');
                   }
                 });
       } else {
         // Show error message
         document.getElementById('passwordError').style.display = 'flex';
+        document.getElementById('adminPassword').classList.add('shake');
+
+        // Remove shake class after animation completes
+        setTimeout(() => {
+          document.getElementById('adminPassword').classList.remove('shake');
+        }, 500);
       }
     });
   }
 
-  // ----------------------------------------
-  // View Vehicles Modal
-  // ----------------------------------------
-
   function setupVehiclesModal() {
-    document.getElementById('vehiclesModal').addEventListener('show.bs.modal', function (event) {
-      const button = event.relatedTarget;
-      const advisorName = button.getAttribute('data-advisor');
-      document.getElementById('advisorName').textContent = advisorName;
+    // Handle clicking the view vehicles button
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('btn-view') || e.target.closest('.btn-view')) {
+        const button = e.target.classList.contains('btn-view') ? e.target : e.target.closest('.btn-view');
+        const advisorId = button.getAttribute('data-advisor-id');
+        const advisorName = button.getAttribute('data-advisor-name');
 
-      // Here you could load actual vehicles data from an API
-      // For demo purposes, we're using static data in the HTML
+        // Set advisor name in modal
+        document.getElementById('advisorName').textContent = advisorName;
+
+        // Show loading indicator
+        document.getElementById('vehiclesLoading').style.display = 'block';
+        document.getElementById('noVehiclesMessage').style.display = 'none';
+
+        // Clear previous vehicles
+        const vehiclesContainer = document.getElementById('advisorVehicles');
+        const vehicleCards = vehiclesContainer.querySelectorAll('.vehicle-card');
+        vehicleCards.forEach(card => card.remove());
+
+        // In a real application, load vehicles from API
+        // For demo purposes, we'll simulate loading and show sample vehicles
+        setTimeout(() => {
+          document.getElementById('vehiclesLoading').style.display = 'none';
+
+          // For demo purposes: show sample vehicles for Advisor ID 1, no vehicles for others
+          if (advisorId == 1) {
+            loadSampleVehicles();
+          } else {
+            document.getElementById('noVehiclesMessage').style.display = 'block';
+          }
+        }, 1000);
+      }
     });
+  }
+
+  function loadSampleVehicles() {
+    const vehiclesContainer = document.getElementById('advisorVehicles');
+
+    // Sample vehicle data
+    const vehicles = [
+      {
+        name: 'Toyota Camry',
+        registration: 'KA01MH4759',
+        owner: 'Ramesh Joshi',
+        status: 'progress'
+      },
+      {
+        name: 'Honda City',
+        registration: 'MH02AB7841',
+        owner: 'Priya Sharma',
+        status: 'progress'
+      }
+    ];
+
+    // Create vehicle cards
+    vehicles.forEach(vehicle => {
+      const vehicleCard = document.createElement('div');
+      vehicleCard.className = 'vehicle-card';
+      vehicleCard.innerHTML = `
+        <div class="vehicle-icon">
+          <i class="fas fa-car"></i>
+        </div>
+        <div class="vehicle-info">
+          <h4 class="vehicle-name">${vehicle.name}</h4>
+          <div class="vehicle-details">
+            <div class="vehicle-detail"><i class="fas fa-id-card"></i> Reg: ${vehicle.registration}</div>
+            <div class="vehicle-detail"><i class="fas fa-user"></i> Owner: ${vehicle.owner}</div>
+          </div>
+        </div>
+        <div class="vehicle-status ${vehicle.status}">
+          <i class="fas fa-spinner"></i> In Progress
+        </div>
+      `;
+
+      vehiclesContainer.appendChild(vehicleCard);
+    });
+  }
+
+  // ----------------------------------------
+  // UI Helper Functions
+  // ----------------------------------------
+
+  function showSpinner(message = 'Processing...') {
+    document.getElementById('loadingText').textContent = message;
+    document.getElementById('loadingSpinner').style.display = 'flex';
+  }
+
+  function hideSpinner() {
+    document.getElementById('loadingSpinner').style.display = 'none';
+  }
+
+  function showAlert(type, message, duration = 5000) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `custom-alert ${type}`;
+
+    // Set icon based on type
+    let icon = 'info-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    if (type === 'success') icon = 'check-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
+
+    // Set alert content
+    alertDiv.innerHTML = `
+      <div class="alert-icon">
+        <i class="fas fa-${icon}"></i>
+      </div>
+      <div class="alert-content">
+        <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+        <div class="alert-message">${message}</div>
+      </div>
+    `;
+
+    // Add to container
+    const alertContainer = document.getElementById('alertContainer');
+    alertContainer.appendChild(alertDiv);
+
+    // Apply entrance animation
+    alertDiv.style.animation = 'slideInUp 0.4s ease-out forwards';
+
+    // Auto-remove after duration
+    setTimeout(() => {
+      // Apply exit animation
+      alertDiv.style.animation = 'slideInUp 0.4s ease-out forwards reverse';
+
+      // Remove after animation completes
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 400);
+    }, duration);
+  }
+
+  function showSuccessModal(message) {
+    document.getElementById('successMessage').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    modal.show();
   }
 </script>
 </body>

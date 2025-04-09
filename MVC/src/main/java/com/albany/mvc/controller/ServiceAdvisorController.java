@@ -250,4 +250,24 @@ public class ServiceAdvisorController {
         log.warn("No valid token found from any source");
         return null;
     }
+    @GetMapping("/api/advisors")
+    @ResponseBody
+    public ResponseEntity<List<ServiceAdvisorDto>> getServiceAdvisorsJson(
+            @RequestParam(required = false) String token,
+            HttpServletRequest request) {
+
+        String validToken = getValidToken(token, request);
+
+        if (validToken == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            List<ServiceAdvisorDto> serviceAdvisors = serviceAdvisorService.getAllServiceAdvisors(validToken);
+            return ResponseEntity.ok(serviceAdvisors);
+        } catch (Exception e) {
+            log.error("Error fetching service advisors: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
