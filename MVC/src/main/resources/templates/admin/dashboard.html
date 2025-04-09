@@ -1641,7 +1641,7 @@
                         </a>
                     </li>
                     <li class="sidebar-menu-item">
-                        <a href="#" class="sidebar-menu-link">
+                        <a th:href="@{/admin/service-advisors}" class="sidebar-menu-link">
                             <i class="fas fa-user-tie"></i>
                             <span>Service Advisors</span>
                         </a>
@@ -1677,10 +1677,11 @@
 
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="user-name" th:text="${userName}">Admin User</div>
+                <!-- Replace dynamic expression with static text -->
+                <div class="user-name">Arthur Morgan</div>
                 <div class="user-role">Administrator</div>
             </div>
-            <button class="logout-btn" onclick="window.location.href='/logout'">
+            <button class="logout-btn" onclick="window.location.href='/admin/logout'">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -2807,44 +2808,58 @@
             }
         });
     });
-    $(document).ready(function() {
-        // Get token from URL parameter (if present)
-        const urlParams = new URLSearchParams(window.location.search);
-        let token = urlParams.get('token');
+    // Authentication management script - add to all admin pages
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get token from storage
+        const tokenFromStorage = localStorage.getItem("jwt-token") || sessionStorage.getItem("jwt-token");
 
-        // If token is in URL, store it in session storage
-        if (token) {
-            sessionStorage.setItem('jwt-token', token);
+        if (tokenFromStorage) {
+            console.log("Token found in storage");
 
-            // Remove token from URL for security (without refreshing page)
-            const url = new URL(window.location);
-            url.searchParams.delete('token');
-            window.history.replaceState({}, document.title, url);
-        } else {
-            // Otherwise, check if token exists in storage
-            token = sessionStorage.getItem('jwt-token') || localStorage.getItem('jwt-token');
+            // Check if current URL already has a token parameter
+            const currentUrl = new URL(window.location.href);
+            const urlToken = currentUrl.searchParams.get('token');
 
-            // If no token is found, redirect to login
-            if (!token) {
-                window.location.href = '/admin/login?error=session_expired';
+            // If URL doesn't have the token, update all navigation links
+            if (!urlToken) {
+                // Add token to all sidebar navigation links
+                document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.includes('token=')) {
+                        const separator = href.includes('?') ? '&' : '?';
+                        link.setAttribute('href', href + separator + 'token=' + encodeURIComponent(tokenFromStorage));
+                    }
+                });
+
+                // Consider adding token to current URL for refresh protection
+                // This is optional but can help with refresh issues
+                if (window.location.href.indexOf('token=') === -1) {
+                    const separator = window.location.href.indexOf('?') === -1 ? '?' : '&';
+                    const newUrl = window.location.href + separator + 'token=' + encodeURIComponent(tokenFromStorage);
+                    window.history.replaceState({}, document.title, newUrl);
+                }
             }
+        } else {
+            console.warn("No token found in storage");
+            // If no token is found, redirect to login
+            window.location.href = '/admin/login?error=session_expired';
         }
 
-        // Configure jQuery AJAX to include token in all requests
-        $.ajaxSetup({
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-            }
-        });
+        // Add token to logout button
+        const logoutBtn = document.querySelector('.logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
 
-        // Patch the fetch API to include token
-        const originalFetch = window.fetch;
-        window.fetch = function(url, options = {}) {
-            options.headers = options.headers || {};
-            if (!options.headers['Authorization'] && token) {
-                options.headers['Authorization'] = 'Bearer ' + token;
-            }
-            return originalFetch(url, options);
-        };
+                // Clear storage
+                localStorage.removeItem("jwt-token");
+                sessionStorage.removeItem("jwt-token");
+
+                // Redirect to logout
+                window.location.href = '/admin/logout';
+            });
+        }
     });
 </script>
+</body>
+</html>

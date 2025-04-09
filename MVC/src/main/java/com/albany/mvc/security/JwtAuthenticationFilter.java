@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // List of paths that should be accessible without authentication
     private final List<String> publicPaths = Arrays.asList(
             "/admin/login",
-            "/admin/api/login", // New API endpoint for login
+            "/admin/api/login",
             "/css/",
             "/js/",
             "/images/",
@@ -40,56 +41,88 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        // Check if the request is for a public path
+        // Get the request URI
         String requestURI = request.getRequestURI();
         boolean isPublicPath = publicPaths.stream().anyMatch(requestURI::startsWith);
-
-        // Special case for dashboard with token parameter
-        if (requestURI.equals("/admin/dashboard") && request.getParameter("token") != null) {
-            log.debug("Allowing access to dashboard with token parameter");
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if (isPublicPath) {
-            // For public paths, just continue with the filter chain
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // Check AJAX requests
         boolean isAjaxRequest = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
 
-        // Get JWT from Authorization header
-        String authHeader = request.getHeader("Authorization");
-        String jwt = null;
+        log.debug("Filtering request: {} (Public: {}, Ajax: {})", requestURI, isPublicPath, isAjaxRequest);
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-            log.debug("Found JWT token in Authorization header");
+        // For public paths, just continue
+        if (isPublicPath) {
+            log.debug("Public path detected, proceeding without authentication");
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        // If token is valid, set authentication in context
-        if (jwt != null && jwtUtil.validateToken(jwt)) {
-            Authentication auth = jwtUtil.getAuthentication(jwt);
-            log.debug("Authentication successful. User: {}, Authorities: {}",
-                    auth.getName(), auth.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-            filterChain.doFilter(request, response);
-        } else {
-            // If token is invalid or missing, clear security context and handle accordingly
-            SecurityContextHolder.clearContext();
-            log.debug("Invalid or missing token. isAjaxRequest: {}", isAjaxRequest);
+        // Check for token in request parameter
+        String tokenParam = request.getParameter("token");
+        if (tokenParam != null && !tokenParam.isEmpty()) {
+            log.debug("Found token parameter");
 
-            // If it's an AJAX request, return 401 Unauthorized
-            if (isAjaxRequest) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"message\":\"Session expired\",\"status\":401}");
+            if (jwtUtil.validateToken(tokenParam)) {
+                Authentication auth = jwtUtil.getAuthentication(tokenParam);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                // Store token in session for future requests
+                HttpSession session = request.getSession();
+                session.setAttribute("jwt-token", tokenParam);
+
+                log.debug("Valid token parameter, set authentication for user: {}", auth.getName());
+                filterChain.doFilter(request, response);
+                return;
             } else {
-                // For regular requests, redirect to login page
-                response.sendRedirect("/admin/login?error=session_expired");
+                log.warn("Invalid token parameter provided");
             }
+        }
+
+        // Check for token in session
+        HttpSession session = request.getSession(false);
+        String sessionToken = session != null ? (String) session.getAttribute("jwt-token") : null;
+
+        if (sessionToken != null && jwtUtil.validateToken(sessionToken)) {
+            Authentication auth = jwtUtil.getAuthentication(sessionToken);
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            log.debug("Valid session token, set authentication for user: {}", auth.getName());
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Check for token in Authorization header
+        String authHeader = request.getHeader("Authorization");
+        String headerToken = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            headerToken = authHeader.substring(7);
+            log.debug("Found token in Authorization header");
+
+            if (jwtUtil.validateToken(headerToken)) {
+                Authentication auth = jwtUtil.getAuthentication(headerToken);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                // Store in session for future requests
+                if (session != null) {
+                    session.setAttribute("jwt-token", headerToken);
+                }
+
+                log.debug("Valid Authorization header token, set authentication for user: {}", auth.getName());
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
+        // If no valid token was found, handle accordingly
+        log.debug("No valid token found, clearing security context");
+        SecurityContextHolder.clearContext();
+
+        if (isAjaxRequest) {
+            log.debug("AJAX request without valid token, returning 401");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\":\"Session expired\",\"status\":401}");
+        } else {
+            log.debug("Redirecting to login page due to missing/invalid token");
+            response.sendRedirect("/admin/login?error=session_expired");
         }
     }
 }

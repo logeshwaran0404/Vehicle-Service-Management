@@ -667,6 +667,8 @@
                 $("#alertMessage").text("Access denied. Your account may not have appropriate permissions.");
             } else if (errorType === "unauthorized") {
                 $("#alertMessage").text("Your account is not authorized to access this system.");
+            } else if (errorType === "session_expired") {
+                $("#alertMessage").text("Your session has expired. Please log in again.");
             } else {
                 $("#alertMessage").text("Authentication failed. Please verify your email and password.");
             }
@@ -688,7 +690,11 @@
             }
         });
 
-        // Handle form submission via AJAX instead of standard form submit
+        // Clear any previous tokens
+        localStorage.removeItem("jwt-token");
+        sessionStorage.removeItem("jwt-token");
+
+        // Handle form submission via AJAX
         $("#loginForm").submit(function(e) {
             e.preventDefault(); // Prevent standard form submission
 
@@ -723,16 +729,20 @@
                     email: email,
                     password: password
                 }),
-                // Update the success handler in login.html
                 success: function(response) {
-                    // Store token in session storage or local storage based on remember me
+                    // Store token in local storage or session storage based on remember me
                     const storage = rememberMe ? localStorage : sessionStorage;
 
+                    // Store token and user info in both storages for redundancy
                     storage.setItem("jwt-token", response.token);
                     storage.setItem("user-role", response.role);
                     storage.setItem("user-name", response.firstName + " " + response.lastName);
+                    storage.setItem("user-email", response.email);
 
-                    // Instead of checking access first (which is causing a 404), add the token to the redirect URL
+                    // Store user info in session storage always
+                    sessionStorage.setItem("jwt-token", response.token);
+
+                    // Add token to redirect URL
                     window.location.href = "/admin/dashboard?token=" + encodeURIComponent(response.token);
                 },
                 error: function(xhr) {
@@ -756,7 +766,6 @@
             return emailRegex.test(email);
         }
     });
-
 </script>
 </body>
 </html>
