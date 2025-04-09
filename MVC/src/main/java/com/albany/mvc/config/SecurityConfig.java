@@ -26,9 +26,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Explicitly permit these paths without authentication
-                        .requestMatchers("/admin/login", "/test-auth", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error").permitAll()
-                        // Require admin role for admin paths
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/login", "/admin/api/login", "/test-auth",
+                                "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error").permitAll()
+                        // Allow dashboard access with token parameter (will be handled by the AdminController)
+                        .requestMatchers(request ->
+                                request.getServletPath().equals("/admin/dashboard") &&
+                                        request.getParameter("token") != null).permitAll()
+                        // Accept both ROLE_ADMIN and ROLE_admin for admin paths
+                        .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_admin")
                         // Any other request needs authentication
                         .anyRequest().authenticated()
                 )
@@ -40,7 +45,7 @@ public class SecurityConfig {
                         .logoutUrl("/admin/logout")
                         .logoutSuccessUrl("/admin/login?logout=true")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID", "albany-auth-token")
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

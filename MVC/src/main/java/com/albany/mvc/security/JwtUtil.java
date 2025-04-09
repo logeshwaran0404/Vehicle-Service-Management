@@ -68,19 +68,30 @@ public class JwtUtil {
             return false;
         }
     }
-    
+
     public Authentication getAuthentication(String token) {
         Claims claims = extractAllClaims(token);
-        
+
         String role = claims.get("role", String.class);
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + (role != null ? role : "USER"));
-        
+
+        // Normalize role format if it's stored as a string
+        if (role != null) {
+            role = role.replace("\"", "").trim().toUpperCase();
+        } else {
+            role = "USER"; // Default role if none found
+        }
+
+        // Ensure role starts with "ROLE_" prefix as required by Spring Security
+        String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+
+        GrantedAuthority authority = new SimpleGrantedAuthority(roleWithPrefix);
+
         UserDetails principal = User.builder()
                 .username(claims.getSubject())
                 .password("")
                 .authorities(Collections.singletonList(authority))
                 .build();
-        
+
         return new UsernamePasswordAuthenticationToken(principal, token, Collections.singletonList(authority));
     }
 }

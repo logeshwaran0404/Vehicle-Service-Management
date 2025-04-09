@@ -723,6 +723,7 @@
                     email: email,
                     password: password
                 }),
+                // Update the success handler in login.html
                 success: function(response) {
                     // Store token in session storage or local storage based on remember me
                     const storage = rememberMe ? localStorage : sessionStorage;
@@ -731,8 +732,8 @@
                     storage.setItem("user-role", response.role);
                     storage.setItem("user-name", response.firstName + " " + response.lastName);
 
-                    // Redirect to dashboard
-                    window.location.href = "/admin/dashboard";
+                    // Instead of checking access first (which is causing a 404), add the token to the redirect URL
+                    window.location.href = "/admin/dashboard?token=" + encodeURIComponent(response.token);
                 },
                 error: function(xhr) {
                     let errorMsg = "Authentication failed. Please check your credentials.";
@@ -755,6 +756,7 @@
             return emailRegex.test(email);
         }
     });
+
 </script>
 </body>
 </html>

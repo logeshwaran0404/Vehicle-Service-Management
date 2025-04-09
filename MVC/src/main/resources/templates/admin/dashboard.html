@@ -2807,4 +2807,44 @@
             }
         });
     });
+    $(document).ready(function() {
+        // Get token from URL parameter (if present)
+        const urlParams = new URLSearchParams(window.location.search);
+        let token = urlParams.get('token');
+
+        // If token is in URL, store it in session storage
+        if (token) {
+            sessionStorage.setItem('jwt-token', token);
+
+            // Remove token from URL for security (without refreshing page)
+            const url = new URL(window.location);
+            url.searchParams.delete('token');
+            window.history.replaceState({}, document.title, url);
+        } else {
+            // Otherwise, check if token exists in storage
+            token = sessionStorage.getItem('jwt-token') || localStorage.getItem('jwt-token');
+
+            // If no token is found, redirect to login
+            if (!token) {
+                window.location.href = '/admin/login?error=session_expired';
+            }
+        }
+
+        // Configure jQuery AJAX to include token in all requests
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+        });
+
+        // Patch the fetch API to include token
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            options.headers = options.headers || {};
+            if (!options.headers['Authorization'] && token) {
+                options.headers['Authorization'] = 'Bearer ' + token;
+            }
+            return originalFetch(url, options);
+        };
+    });
 </script>

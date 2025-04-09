@@ -44,6 +44,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         boolean isPublicPath = publicPaths.stream().anyMatch(requestURI::startsWith);
 
+        // Special case for dashboard with token parameter
+        if (requestURI.equals("/admin/dashboard") && request.getParameter("token") != null) {
+            log.debug("Allowing access to dashboard with token parameter");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (isPublicPath) {
             // For public paths, just continue with the filter chain
             filterChain.doFilter(request, response);
@@ -59,16 +66,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
+            log.debug("Found JWT token in Authorization header");
         }
 
         // If token is valid, set authentication in context
         if (jwt != null && jwtUtil.validateToken(jwt)) {
             Authentication auth = jwtUtil.getAuthentication(jwt);
+            log.debug("Authentication successful. User: {}, Authorities: {}",
+                    auth.getName(), auth.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } else {
             // If token is invalid or missing, clear security context and handle accordingly
             SecurityContextHolder.clearContext();
+            log.debug("Invalid or missing token. isAjaxRequest: {}", isAjaxRequest);
 
             // If it's an AJAX request, return 401 Unauthorized
             if (isAjaxRequest) {
