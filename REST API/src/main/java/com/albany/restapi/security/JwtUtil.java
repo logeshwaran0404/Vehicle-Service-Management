@@ -22,7 +22,7 @@ public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String secretKey;
-    
+
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
@@ -53,7 +53,6 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Make sure the following method is also in your JwtUtil class
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -69,9 +68,12 @@ public class JwtUtil {
             Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
             if (!authorities.isEmpty()) {
                 String authority = authorities.iterator().next().getAuthority();
-                // Remove "ROLE_" prefix if present
+                // Remove "ROLE_" prefix if present for consistency
                 String role = authority.startsWith("ROLE_") ? authority.substring(5) : authority;
                 extraClaims.put("role", role);
+            } else {
+                // Fallback to using the role directly from the enum
+                extraClaims.put("role", user.getRole().name());
             }
         }
 
@@ -88,10 +90,9 @@ public class JwtUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    // Add this method to your JwtUtil class in the REST API project
+
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
-
 }

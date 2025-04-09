@@ -16,39 +16,39 @@ import java.util.List;
 public class ServiceAdvisorController {
 
     private final ServiceAdvisorService advisorService;
-    
+
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'admin')") // Changed to handle both capitalizations
     public ResponseEntity<List<ServiceAdvisorResponse>> getAllServiceAdvisors() {
         List<ServiceAdvisorResponse> advisors = advisorService.getAllServiceAdvisors();
         return ResponseEntity.ok(advisors);
     }
-    
+
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<ServiceAdvisorResponse> getServiceAdvisorById(@PathVariable Integer id) {
         ServiceAdvisorResponse advisor = advisorService.getServiceAdvisorById(id);
         return ResponseEntity.ok(advisor);
     }
-    
+
     @PostMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<ServiceAdvisorResponse> createServiceAdvisor(@RequestBody ServiceAdvisorRequest request) {
         ServiceAdvisorResponse newAdvisor = advisorService.createServiceAdvisor(request);
         return ResponseEntity.ok(newAdvisor);
     }
-    
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<ServiceAdvisorResponse> updateServiceAdvisor(
-            @PathVariable Integer id, 
+            @PathVariable Integer id,
             @RequestBody ServiceAdvisorRequest request) {
         ServiceAdvisorResponse updatedAdvisor = advisorService.updateServiceAdvisor(id, request);
         return ResponseEntity.ok(updatedAdvisor);
     }
-    
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<Void> deleteServiceAdvisor(@PathVariable Integer id) {
         advisorService.deleteServiceAdvisor(id);
         return ResponseEntity.noContent().build();
