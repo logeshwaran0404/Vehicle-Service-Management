@@ -660,50 +660,93 @@
 
             // Check for specific error types or provide more helpful messages
             if (errorType === "invalid_grant" || errorType === "bad_credentials") {
-                // This usually means password is wrong (when email exists)
                 $("#alertMessage").text("Invalid password. Please check your password and try again.");
             } else if (errorType === "invalid_token" || errorType === "invalid_client") {
-                // This could mean the credentials don't match any user
                 $("#alertMessage").text("Email not found. Please check your email address.");
             } else if (errorType === "access_denied") {
                 $("#alertMessage").text("Access denied. Your account may not have appropriate permissions.");
             } else if (errorType === "unauthorized") {
                 $("#alertMessage").text("Your account is not authorized to access this system.");
             } else {
-                // Default case
                 $("#alertMessage").text("Authentication failed. Please verify your email and password.");
             }
 
             $("#loginAlert").show();
         }
 
-        // For form-based login, you can add simple validation:
-        $("#loginForm").submit(function() {
+        // Password toggle functionality
+        $("#togglePassword").click(function() {
+            const passwordField = $("#password");
+            const eyeIcon = $("#eyeIcon");
+
+            if (passwordField.attr("type") === "password") {
+                passwordField.attr("type", "text");
+                eyeIcon.removeClass("fa-eye").addClass("fa-eye-slash");
+            } else {
+                passwordField.attr("type", "password");
+                eyeIcon.removeClass("fa-eye-slash").addClass("fa-eye");
+            }
+        });
+
+        // Handle form submission via AJAX instead of standard form submit
+        $("#loginForm").submit(function(e) {
+            e.preventDefault(); // Prevent standard form submission
+
             const email = $("#email").val();
             const password = $("#password").val();
-            let hasError = false;
+            const rememberMe = $("#rememberMe").is(":checked");
 
-            // Email format validation
+            // Basic form validation
             if (!isValidEmail(email)) {
                 $("#alertMessage").text("Please enter a valid email address.");
                 $("#loginAlert").show();
-                hasError = true;
-            }
-            // Password length check
-            else if (password.length < 6) {
-                $("#alertMessage").text("Password must be at least 6 characters long.");
-                $("#loginAlert").show();
-                hasError = true;
+                return false;
             }
 
-            if (hasError) {
-                return false; // Prevent form submission
+            // Password length check
+            if (password.length < 6) {
+                $("#alertMessage").text("Password must be at least 6 characters long.");
+                $("#loginAlert").show();
+                return false;
             }
 
             // Show loading button
             $(".btn-login").html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Signing in...');
             $(".btn-login").prop("disabled", true);
-            return true;
+
+            // Send AJAX request
+            $.ajax({
+                url: "/admin/api/login",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    email: email,
+                    password: password
+                }),
+                success: function(response) {
+                    // Store token in session storage or local storage based on remember me
+                    const storage = rememberMe ? localStorage : sessionStorage;
+
+                    storage.setItem("jwt-token", response.token);
+                    storage.setItem("user-role", response.role);
+                    storage.setItem("user-name", response.firstName + " " + response.lastName);
+
+                    // Redirect to dashboard
+                    window.location.href = "/admin/dashboard";
+                },
+                error: function(xhr) {
+                    let errorMsg = "Authentication failed. Please check your credentials.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    $("#alertMessage").text(errorMsg);
+                    $("#loginAlert").show();
+
+                    // Reset button state
+                    $(".btn-login").html('<span class="btn-text"><span>Sign in to Dashboard</span><i class="fas fa-arrow-right"></i></span>');
+                    $(".btn-login").prop("disabled", false);
+                }
+            });
         });
 
         // Email validation helper function

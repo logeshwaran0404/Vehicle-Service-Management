@@ -20,16 +20,16 @@ public class AdminController {
         // Get the currently authenticated user
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName(); // This will be the user's email
-        
+
         log.info("Loading dashboard for user: {}", userName);
-        
+
         // Add attributes to the model for the dashboard view
         model.addAttribute("userName", userName);
-        
+
         // You can add more attributes for the dashboard stats here
         // For now we're just passing a placeholder
         model.addAttribute("dashboardStats", null);
-        
+
         return "admin/dashboard";
     }
     
