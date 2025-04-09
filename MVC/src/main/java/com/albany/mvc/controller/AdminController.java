@@ -54,19 +54,12 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    @GetMapping("/customers")
-    public String customers(Model model) {
-        // Add any data needed for the customers view
-        model.addAttribute("customers", null);
+//    @GetMapping("/customers")
+//    public String customers(Model model) {
+//        // Add any data needed for the customers view
+//        model.addAttribute("customers", null);
+//
+//        return "admin/customers";
+//    }
 
-        return "admin/customers";
-    }
-
-    @GetMapping("/service-advisors")
-    public String serviceAdvisors(Model model) {
-        // Add any data needed for the service advisors view
-        model.addAttribute("serviceAdvisors", null);
-
-        return "admin/serviceAdvisor";
-    }
 }
