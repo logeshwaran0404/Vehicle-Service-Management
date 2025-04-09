@@ -53,4 +53,5 @@ public class ServiceAdvisorController {
         advisorService.deleteServiceAdvisor(id);
         return ResponseEntity.noContent().build();
     }
+
 }
