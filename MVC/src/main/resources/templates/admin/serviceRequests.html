@@ -2167,11 +2167,47 @@
         if (customerIdSelect) {
             customerIdSelect.addEventListener('change', function() {
                 const customerId = this.value;
+                const addNewVehicleBtn = document.getElementById('addNewVehicleBtn');
+
                 if (customerId) {
                     loadVehiclesForCustomer(customerId);
+                    // Enable the "Add Vehicle" button
+                    if (addNewVehicleBtn) {
+                        addNewVehicleBtn.disabled = false;
+                    }
                 } else {
                     resetVehicleDropdown();
+                    // Disable the "Add Vehicle" button
+                    if (addNewVehicleBtn) {
+                        addNewVehicleBtn.disabled = true;
+                    }
+                    // Hide new vehicle form if it's open
+                    document.getElementById('newVehicleForm').style.display = 'none';
                 }
+            });
+        }
+
+        // Add New Vehicle button
+        const addNewVehicleBtn = document.getElementById('addNewVehicleBtn');
+        if (addNewVehicleBtn) {
+            addNewVehicleBtn.addEventListener('click', function() {
+                document.getElementById('newVehicleForm').style.display = 'block';
+            });
+        }
+
+        // Cancel New Vehicle button
+        const cancelNewVehicleBtn = document.getElementById('cancelNewVehicleBtn');
+        if (cancelNewVehicleBtn) {
+            cancelNewVehicleBtn.addEventListener('click', function() {
+                document.getElementById('newVehicleForm').style.display = 'none';
+            });
+        }
+
+        // Save New Vehicle button
+        const saveNewVehicleBtn = document.getElementById('saveNewVehicleBtn');
+        if (saveNewVehicleBtn) {
+            saveNewVehicleBtn.addEventListener('click', function() {
+                saveNewVehicle();
             });
         }
 
@@ -2353,6 +2389,7 @@
     }
 
     // Add this new function
+    // Function to save a new vehicle
     function saveNewVehicle() {
         const customerId = document.getElementById('customerId').value;
 
@@ -2379,17 +2416,20 @@
             model: model,
             registrationNumber: regNumber,
             category: category,
-            year: year
+            year: parseInt(year)
         };
 
         showSpinner();
 
+        // Get the token
+        const token = getToken();
+
         // API call to create new vehicle
-        fetch('/admin/api/customers/' + customerId + '/vehicles', {
+        fetch(`/admin/api/customers/${customerId}/vehicles${token ? `?token=${token}` : ''}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getToken()
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(vehicleData)
         })
@@ -2398,10 +2438,17 @@
                     window.location.href = '/admin/login?error=session_expired';
                     throw new Error('Session expired');
                 }
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'Failed to create vehicle');
+                    });
+                }
                 return response.json();
             })
             .then(data => {
                 hideSpinner();
+
+                console.log('Vehicle created successfully:', data);
 
                 // Add new vehicle to the vehicles array
                 vehicles.push(data);
@@ -2409,10 +2456,10 @@
                 // Update dropdown and select the new vehicle
                 const dropdown = document.getElementById('vehicleId');
                 const option = document.createElement('option');
-                option.value = data.vehicleId || data.id;
+                option.value = data.vehicleId;
                 option.textContent = `${data.brand} ${data.model} (${data.registrationNumber})`;
                 dropdown.appendChild(option);
-                dropdown.value = data.vehicleId || data.id;
+                dropdown.value = data.vehicleId;
 
                 // Hide the form
                 document.getElementById('newVehicleForm').style.display = 'none';
@@ -2429,8 +2476,72 @@
             .catch(error => {
                 hideSpinner();
                 console.error('Error saving vehicle:', error);
-                showToast('Failed to create vehicle. Please try again.', 'error');
+                showToast('Failed to create vehicle: ' + error.message, 'error');
             });
+    }
+
+    // Function to load vehicles for a customer
+    function loadVehiclesForCustomer(customerId) {
+        const vehicleDropdown = document.getElementById('vehicleId');
+        if (vehicleDropdown) {
+            vehicleDropdown.disabled = true;
+            vehicleDropdown.innerHTML = '<option value="">Loading vehicles...</option>';
+
+            const token = getToken();
+
+            fetch(`/admin/api/customers/${customerId}/vehicles${token ? `?token=${token}` : ''}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = '/admin/login?error=session_expired';
+                        throw new Error('Session expired');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    vehicles = data;
+                    populateVehicleDropdown(data);
+                })
+                .catch(error => {
+                    console.error('Error loading vehicles:', error);
+                    resetVehicleDropdown('Error loading vehicles. Please try again.');
+                });
+        }
+    }
+
+    // Function to reset vehicle dropdown
+    function resetVehicleDropdown(message = 'Select Customer First') {
+        const dropdown = document.getElementById('vehicleId');
+        if (dropdown) {
+            dropdown.innerHTML = `<option value="">${message}</option>`;
+            dropdown.disabled = true;
+        }
+    }
+
+    // Function to populate vehicle dropdown
+    function populateVehicleDropdown(vehicles) {
+        const dropdown = document.getElementById('vehicleId');
+        if (!dropdown) return;
+
+        dropdown.innerHTML = '<option value="">Select Vehicle</option>';
+
+        if (vehicles && vehicles.length > 0) {
+            vehicles.forEach(vehicle => {
+                const option = document.createElement('option');
+                option.value = vehicle.vehicleId;
+                option.textContent = `${vehicle.brand} ${vehicle.model} (${vehicle.registrationNumber})`;
+                dropdown.appendChild(option);
+            });
+            dropdown.disabled = false;
+        } else {
+            dropdown.innerHTML = '<option value="">No vehicles found</option>';
+            dropdown.disabled = true;
+        }
     }
 
 
