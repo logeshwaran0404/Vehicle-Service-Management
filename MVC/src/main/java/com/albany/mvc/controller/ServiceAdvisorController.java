@@ -2,21 +2,17 @@ package com.albany.mvc.controller;
 
 import com.albany.mvc.dto.ServiceAdvisorDto;
 import com.albany.mvc.service.ServiceAdvisorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/service-advisors")
@@ -25,17 +21,14 @@ import java.util.Map;
 public class ServiceAdvisorController {
 
     private final ServiceAdvisorService serviceAdvisorService;
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
 
-    @Value("${api.base-url}")
-    private String apiBaseUrl;
-
+    // This returns the view for the service-advisors page
     @GetMapping
     public String serviceAdvisorsPage(
             @RequestParam(required = false) String token,
             Model model,
             HttpServletRequest request) {
+
         log.info("Accessing service advisors page");
 
         // Get token from various sources
@@ -46,22 +39,36 @@ public class ServiceAdvisorController {
             return "redirect:/admin/login?error=session_expired";
         }
 
+        return "admin/serviceAdvisor";
+    }
+
+    // This REST endpoint handles the AJAX request to get all advisors
+    @GetMapping("/api/advisors")
+    @ResponseBody
+    public ResponseEntity<List<ServiceAdvisorDto>> getServiceAdvisorsJson(
+            @RequestParam(required = false) String token,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            HttpServletRequest request) {
+
+        // Get token from various sources
+        String validToken = getValidToken(token, authHeader, request);
+
+        if (validToken == null) {
+            return ResponseEntity.status(401).body(Collections.emptyList());
+        }
+
         try {
-            // Debug log the token
-            log.debug("Using token: {}", validToken.substring(0, Math.min(10, validToken.length())) + "...");
-
             List<ServiceAdvisorDto> serviceAdvisors = serviceAdvisorService.getAllServiceAdvisors(validToken);
-            model.addAttribute("serviceAdvisors", serviceAdvisors);
-            log.info("Successfully loaded {} service advisors", serviceAdvisors.size());
 
-            // Set the admin's name for the page (hardcoded per requirement)
-            model.addAttribute("userName", "Arthur Morgan");
+            if (serviceAdvisors == null) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
 
-            return "admin/serviceAdvisor";
+            log.info("Successfully fetched {} service advisors", serviceAdvisors.size());
+            return ResponseEntity.ok(serviceAdvisors);
         } catch (Exception e) {
-            log.error("Error loading service advisors: {}", e.getMessage(), e);
-            model.addAttribute("apiError", "Failed to load service advisors: " + e.getMessage());
-            return "admin/serviceAdvisor"; // Return the page with error message
+            log.error("Error fetching service advisors: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Collections.emptyList());
         }
     }
 
@@ -70,9 +77,10 @@ public class ServiceAdvisorController {
     public ResponseEntity<ServiceAdvisorDto> getServiceAdvisor(
             @PathVariable Integer id,
             @RequestParam(required = false) String token,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             HttpServletRequest request) {
 
-        String validToken = getValidToken(token, request);
+        String validToken = getValidToken(token, authHeader, request);
 
         if (validToken == null) {
             return ResponseEntity.status(401).build();
@@ -97,9 +105,10 @@ public class ServiceAdvisorController {
     public ResponseEntity<ServiceAdvisorDto> createServiceAdvisor(
             @RequestBody ServiceAdvisorDto advisorDto,
             @RequestParam(required = false) String token,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             HttpServletRequest request) {
 
-        String validToken = getValidToken(token, request);
+        String validToken = getValidToken(token, authHeader, request);
 
         if (validToken == null) {
             return ResponseEntity.status(401).build();
@@ -125,9 +134,10 @@ public class ServiceAdvisorController {
             @PathVariable Integer id,
             @RequestBody ServiceAdvisorDto advisorDto,
             @RequestParam(required = false) String token,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             HttpServletRequest request) {
 
-        String validToken = getValidToken(token, request);
+        String validToken = getValidToken(token, authHeader, request);
 
         if (validToken == null) {
             return ResponseEntity.status(401).build();
@@ -152,9 +162,10 @@ public class ServiceAdvisorController {
     public ResponseEntity<Void> deleteServiceAdvisor(
             @PathVariable Integer id,
             @RequestParam(required = false) String token,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             HttpServletRequest request) {
 
-        String validToken = getValidToken(token, request);
+        String validToken = getValidToken(token, authHeader, request);
 
         if (validToken == null) {
             return ResponseEntity.status(401).build();
@@ -174,53 +185,17 @@ public class ServiceAdvisorController {
         }
     }
 
-    @GetMapping("/debug-token")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> debugToken(
-            @RequestParam(required = false) String token,
-            HttpServletRequest request) {
-
-        String validToken = getValidToken(token, request);
-        Map<String, Object> response = new HashMap<>();
-
-        if (validToken == null) {
-            response.put("error", "No valid token found");
-            return ResponseEntity.status(401).body(response);
-        }
-
-        response.put("token_valid", true);
-        response.put("token_prefix", validToken.substring(0, Math.min(10, validToken.length())) + "...");
-
-        // Test API connection
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(validToken);
-
-            ResponseEntity<String> testResponse = restTemplate.exchange(
-                    apiBaseUrl + "/debug/token-info",
-                    HttpMethod.GET,
-                    new HttpEntity<>(headers),
-                    String.class
-            );
-
-            response.put("api_connection", "success");
-            response.put("api_status", testResponse.getStatusCode().toString());
-
-            if (testResponse.getBody() != null) {
-                response.put("api_response", objectMapper.readValue(testResponse.getBody(), Map.class));
-            }
-        } catch (Exception e) {
-            response.put("api_connection", "failed");
-            response.put("error_message", e.getMessage());
-        }
-
-        return ResponseEntity.ok(response);
-    }
-
     /**
      * Gets a valid token from various sources
      */
     private String getValidToken(String tokenParam, HttpServletRequest request) {
+        return getValidToken(tokenParam, null, request);
+    }
+
+    /**
+     * Gets a valid token from various sources with Auth header
+     */
+    private String getValidToken(String tokenParam, String authHeader, HttpServletRequest request) {
         // Check parameter first
         if (tokenParam != null && !tokenParam.isEmpty()) {
             log.debug("Using token from parameter");
@@ -230,7 +205,13 @@ public class ServiceAdvisorController {
             return tokenParam;
         }
 
-        // Check session next
+        // Check header next
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            log.debug("Using token from Authorization header");
+            return authHeader.substring(7);
+        }
+
+        // Check session last
         HttpSession session = request.getSession(false);
         if (session != null) {
             String sessionToken = (String) session.getAttribute("jwt-token");
@@ -240,34 +221,7 @@ public class ServiceAdvisorController {
             }
         }
 
-        // Check header last
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            log.debug("Using token from Authorization header");
-            return authHeader.substring(7);
-        }
-
         log.warn("No valid token found from any source");
         return null;
-    }
-    @GetMapping("/api/advisors")
-    @ResponseBody
-    public ResponseEntity<List<ServiceAdvisorDto>> getServiceAdvisorsJson(
-            @RequestParam(required = false) String token,
-            HttpServletRequest request) {
-
-        String validToken = getValidToken(token, request);
-
-        if (validToken == null) {
-            return ResponseEntity.status(401).build();
-        }
-
-        try {
-            List<ServiceAdvisorDto> serviceAdvisors = serviceAdvisorService.getAllServiceAdvisors(validToken);
-            return ResponseEntity.ok(serviceAdvisors);
-        } catch (Exception e) {
-            log.error("Error fetching service advisors: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).build();
-        }
     }
 }

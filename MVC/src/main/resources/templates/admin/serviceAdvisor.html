@@ -2504,6 +2504,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 
 <script>
+  // Wait for DOM to be loaded
   document.addEventListener('DOMContentLoaded', function() {
     // Initialize the application
     initializeApp();
@@ -2694,7 +2695,8 @@
   function loadServiceAdvisors() {
     showSpinner('Loading service advisors...');
 
-    fetch('/admin/api/advisors', {
+    // FIXED URL - The correct endpoint path
+    fetch('/admin/service-advisors/api/advisors', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -2708,13 +2710,17 @@
                 throw new Error('Session expired');
               }
 
+              if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+              }
+
               return response.json();
             })
             .then(data => {
               hideSpinner();
 
               // Store the service advisors in the global variable
-              serviceAdvisors = data;
+              serviceAdvisors = Array.isArray(data) ? data : [];
 
               // Render the service advisors
               renderAdvisors(serviceAdvisors);
@@ -2733,6 +2739,7 @@
             });
   }
 
+  // This function is essential for displaying the service advisors
   function renderAdvisors(advisors) {
     const container = document.getElementById('advisorsGrid');
 
@@ -2776,101 +2783,140 @@
     const initials = firstInitial + lastInitial;
 
     tempDiv.innerHTML = `
-      <div class="advisor-card">
-        <div class="advisor-image-container">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service Advisor" class="advisor-image">
-          <div class="advisor-id-badge">
-            <i class="fas fa-id-badge"></i>
-            <span>${formattedId}</span>
-          </div>
-        </div>
-        <div class="advisor-content">
-          <div class="advisor-header">
-            <h3 class="advisor-name">${advisor.firstName} ${advisor.lastName}</h3>
-            <div class="advisor-title">
-              <i class="fas fa-tools"></i>
-              <span>${advisor.specialization || 'General Service Advisor'}</span>
-            </div>
-          </div>
-
-          <div class="advisor-details">
-            <div class="detail-item">
-              <div class="detail-icon">
-                <i class="fas fa-building"></i>
-              </div>
-              <div class="detail-text">
-                <div class="detail-label">Department</div>
-                <div class="detail-value">${advisor.department || 'Service Department'}</div>
-              </div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-icon">
-                <i class="fas fa-phone-alt"></i>
-              </div>
-              <div class="detail-text">
-                <div class="detail-label">Contact</div>
-                <div class="detail-value">${advisor.phoneNumber || 'Not provided'}</div>
-              </div>
-            </div>
-
-            <div class="detail-item">
-              <div class="detail-icon">
-                <i class="fas fa-envelope"></i>
-              </div>
-              <div class="detail-text">
-                <div class="detail-label">Email</div>
-                <div class="detail-value">${advisor.email}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="advisor-workload">
-            <div class="workload-header">
-              <div class="workload-title">
-                <i class="fas fa-tasks"></i>
-                Current Workload
-              </div>
-              <div class="workload-percent ${workloadClass}">${advisor.workloadPercentage}%</div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar ${workloadClass}" style="width: ${advisor.workloadPercentage}%"></div>
-            </div>
-            <div class="workload-info">
-              <div class="active-services">
-                <i class="fas fa-car-side"></i>
-                <span>${advisor.activeServices} ${advisor.activeServices === 1 ? 'vehicle' : 'vehicles'} in service</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="advisor-actions">
-            <button class="btn-view" data-bs-toggle="modal" data-bs-target="#vehiclesModal"
-                    data-advisor-id="${advisor.advisorId}"
-                    data-advisor-name="${advisor.firstName} ${advisor.lastName}">
-              <i class="fas fa-eye"></i> View Vehicles
-            </button>
-            <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editAdvisorModal"
-                    data-advisor-id="${advisor.advisorId}">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn-fire" data-bs-toggle="modal" data-bs-target="#fireAdvisorModal"
-                    data-advisor-id="${advisor.advisorId}"
-                    data-advisor-name="${advisor.firstName} ${advisor.lastName}"
-                    data-advisor-initials="${initials}">
-              <i class="fas fa-user-slash"></i> Fire
-            </button>
-          </div>
+    <div class="advisor-card">
+      <div class="advisor-image-container">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service Advisor" class="advisor-image">
+        <div class="advisor-id-badge">
+          <i class="fas fa-id-badge"></i>
+          <span>${formattedId}</span>
         </div>
       </div>
-    `;
+      <div class="advisor-content">
+        <div class="advisor-header">
+          <h3 class="advisor-name">${advisor.firstName} ${advisor.lastName}</h3>
+          <div class="advisor-title">
+            <i class="fas fa-tools"></i>
+            <span>${advisor.specialization || 'General Service Advisor'}</span>
+          </div>
+        </div>
+
+        <div class="advisor-details">
+          <div class="detail-item">
+            <div class="detail-icon">
+              <i class="fas fa-building"></i>
+            </div>
+            <div class="detail-text">
+              <div class="detail-label">Department</div>
+              <div class="detail-value">${advisor.department || 'Service Department'}</div>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-icon">
+              <i class="fas fa-phone-alt"></i>
+            </div>
+            <div class="detail-text">
+              <div class="detail-label">Contact</div>
+              <div class="detail-value">${advisor.phoneNumber || 'Not provided'}</div>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="detail-text">
+              <div class="detail-label">Email</div>
+              <div class="detail-value">${advisor.email}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="advisor-workload">
+          <div class="workload-header">
+            <div class="workload-title">
+              <i class="fas fa-tasks"></i>
+              Current Workload
+            </div>
+            <div class="workload-percent ${workloadClass}">${advisor.workloadPercentage}%</div>
+          </div>
+          <div class="progress">
+            <div class="progress-bar ${workloadClass}" style="width: ${advisor.workloadPercentage}%"></div>
+          </div>
+          <div class="workload-info">
+            <div class="active-services">
+              <i class="fas fa-car-side"></i>
+              <span>${advisor.activeServices} ${advisor.activeServices === 1 ? 'vehicle' : 'vehicles'} in service</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="advisor-actions">
+          <button class="btn-view" data-bs-toggle="modal" data-bs-target="#vehiclesModal"
+                  data-advisor-id="${advisor.advisorId}"
+                  data-advisor-name="${advisor.firstName} ${advisor.lastName}">
+            <i class="fas fa-eye"></i> View Vehicles
+          </button>
+          <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editAdvisorModal"
+                  data-advisor-id="${advisor.advisorId}">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn-fire" data-bs-toggle="modal" data-bs-target="#fireAdvisorModal"
+                  data-advisor-id="${advisor.advisorId}"
+                  data-advisor-name="${advisor.firstName} ${advisor.lastName}"
+                  data-advisor-initials="${initials}">
+            <i class="fas fa-user-slash"></i> Fire
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
 
     return tempDiv.firstElementChild;
   }
 
-  // ----------------------------------------
-  // Form Functionality
-  // ----------------------------------------
+  function loadSampleVehicles() {
+    const vehiclesContainer = document.getElementById('advisorVehicles');
+
+    // Sample vehicle data
+    const vehicles = [
+      {
+        name: 'Toyota Camry',
+        registration: 'KA01MH4759',
+        owner: 'Ramesh Joshi',
+        status: 'progress'
+      },
+      {
+        name: 'Honda City',
+        registration: 'MH02AB7841',
+        owner: 'Priya Sharma',
+        status: 'progress'
+      }
+    ];
+
+    // Create vehicle cards
+    vehicles.forEach(vehicle => {
+      const vehicleCard = document.createElement('div');
+      vehicleCard.className = 'vehicle-card';
+      vehicleCard.innerHTML = `
+      <div class="vehicle-icon">
+        <i class="fas fa-car"></i>
+      </div>
+      <div class="vehicle-info">
+        <h4 class="vehicle-name">${vehicle.name}</h4>
+        <div class="vehicle-details">
+          <div class="vehicle-detail"><i class="fas fa-id-card"></i> Reg: ${vehicle.registration}</div>
+          <div class="vehicle-detail"><i class="fas fa-user"></i> Owner: ${vehicle.owner}</div>
+        </div>
+      </div>
+      <div class="vehicle-status ${vehicle.status}">
+        <i class="fas fa-spinner"></i> In Progress
+      </div>
+    `;
+
+      vehiclesContainer.appendChild(vehicleCard);
+    });
+  }
 
   function setupAddAdvisorForm() {
     document.getElementById('addAdvisorBtn').addEventListener('click', function() {
@@ -2904,7 +2950,7 @@
       // Show loading spinner
       showSpinner('Creating new service advisor...');
 
-      // Submit form data via AJAX
+      // Submit form data via AJAX - FIXED URL
       fetch('/admin/service-advisors', {
         method: 'POST',
         headers: {
@@ -3007,7 +3053,7 @@
       // Show loading spinner
       showSpinner('Updating service advisor...');
 
-      // Submit form data via AJAX
+      // Submit form data via AJAX - FIXED URL
       fetch(`/admin/service-advisors/${advisorId}`, {
         method: 'PUT',
         headers: {
@@ -3077,6 +3123,7 @@
   function fetchAdvisorDetails(advisorId) {
     showSpinner('Loading advisor details...');
 
+    // FIXED URL for fetching a single advisor
     fetch(`/admin/service-advisors/${advisorId}`, {
       method: 'GET',
       headers: {
@@ -3182,7 +3229,7 @@
         // Show loading spinner
         showSpinner('Processing termination...');
 
-        // Send deletion request via AJAX
+        // FIXED URL for firing an advisor
         fetch(`/admin/service-advisors/${advisorId}`, {
           method: 'DELETE',
           headers: {
@@ -3270,49 +3317,6 @@
     });
   }
 
-  function loadSampleVehicles() {
-    const vehiclesContainer = document.getElementById('advisorVehicles');
-
-    // Sample vehicle data
-    const vehicles = [
-      {
-        name: 'Toyota Camry',
-        registration: 'KA01MH4759',
-        owner: 'Ramesh Joshi',
-        status: 'progress'
-      },
-      {
-        name: 'Honda City',
-        registration: 'MH02AB7841',
-        owner: 'Priya Sharma',
-        status: 'progress'
-      }
-    ];
-
-    // Create vehicle cards
-    vehicles.forEach(vehicle => {
-      const vehicleCard = document.createElement('div');
-      vehicleCard.className = 'vehicle-card';
-      vehicleCard.innerHTML = `
-        <div class="vehicle-icon">
-          <i class="fas fa-car"></i>
-        </div>
-        <div class="vehicle-info">
-          <h4 class="vehicle-name">${vehicle.name}</h4>
-          <div class="vehicle-details">
-            <div class="vehicle-detail"><i class="fas fa-id-card"></i> Reg: ${vehicle.registration}</div>
-            <div class="vehicle-detail"><i class="fas fa-user"></i> Owner: ${vehicle.owner}</div>
-          </div>
-        </div>
-        <div class="vehicle-status ${vehicle.status}">
-          <i class="fas fa-spinner"></i> In Progress
-        </div>
-      `;
-
-      vehiclesContainer.appendChild(vehicleCard);
-    });
-  }
-
   // ----------------------------------------
   // UI Helper Functions
   // ----------------------------------------
@@ -3339,14 +3343,14 @@
 
     // Set alert content
     alertDiv.innerHTML = `
-      <div class="alert-icon">
-        <i class="fas fa-${icon}"></i>
-      </div>
-      <div class="alert-content">
-        <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-        <div class="alert-message">${message}</div>
-      </div>
-    `;
+    <div class="alert-icon">
+      <i class="fas fa-${icon}"></i>
+    </div>
+    <div class="alert-content">
+      <div class="alert-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+      <div class="alert-message">${message}</div>
+    </div>
+  `;
 
     // Add to container
     const alertContainer = document.getElementById('alertContainer');
@@ -3372,6 +3376,41 @@
     const modal = new bootstrap.Modal(document.getElementById('successModal'));
     modal.show();
   }
+
+  // Add this function to handle token authentication for all pages
+  function setupAuthentication() {
+    // Get token from storage
+    const tokenFromStorage = localStorage.getItem("jwt-token") || sessionStorage.getItem("jwt-token");
+
+    if (tokenFromStorage) {
+      console.log("Token found in storage");
+
+      // Check if current URL already has a token parameter
+      const currentUrl = new URL(window.location.href);
+      const urlToken = currentUrl.searchParams.get('token');
+
+      // If URL doesn't have the token, update all navigation links
+      if (!urlToken) {
+        // Add token to all sidebar navigation links
+        document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+          const href = link.getAttribute('href');
+          if (href && !href.includes('token=')) {
+            const separator = href.includes('?') ? '&' : '?';
+            link.setAttribute('href', href + separator + 'token=' + encodeURIComponent(tokenFromStorage));
+          }
+        });
+      }
+    } else {
+      console.warn("No token found in storage");
+      // If no token is found, redirect to login
+      window.location.href = '/admin/login?error=session_expired';
+    }
+  }
+
+  // Initialize authentication on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    setupAuthentication();
+  });
 </script>
 </body>
 </html>
