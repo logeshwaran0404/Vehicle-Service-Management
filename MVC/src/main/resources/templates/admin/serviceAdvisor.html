@@ -1913,23 +1913,22 @@
         <div class="nav-section-title">Main</div>
         <ul class="sidebar-menu">
           <li class="sidebar-menu-item">
-            <a th:href="@{/admin/dashboard}" class="sidebar-menu-link">
+            <a href="#" class="sidebar-menu-link active">
               <i class="fas fa-tachometer-alt"></i>
               <span>Dashboard</span>
             </a>
-          </li>
+
         </ul>
       </div>
 
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
         <ul class="sidebar-menu">
-          <li class="sidebar-menu-item">
-            <a href="#" class="sidebar-menu-link">
-              <i class="fas fa-clipboard-list"></i>
-              <span>Service Requests</span>
-            </a>
           </li>
+          <a th:href="@{/admin/service-requests}" class="sidebar-menu-link">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Service Requests</span>
+          </a>
           <li class="sidebar-menu-item">
             <a href="#" class="sidebar-menu-link">
               <i class="fas fa-car"></i>
@@ -1943,7 +1942,7 @@
             </a>
           </li>
           <li class="sidebar-menu-item">
-            <a th:href="@{/admin/service-advisors}" class="sidebar-menu-link active">
+            <a th:href="@{/admin/service-advisors}" class="sidebar-menu-link">
               <i class="fas fa-user-tie"></i>
               <span>Service Advisors</span>
             </a>
@@ -1954,6 +1953,7 @@
               <span>Inventory</span>
             </a>
           </li>
+
           <li class="sidebar-menu-item">
             <a href="#" class="sidebar-menu-link">
               <i class="fas fa-tools"></i>
@@ -1968,13 +1968,13 @@
           </li>
           <li class="sidebar-menu-item">
             <a href="#" class="sidebar-menu-link">
-              <i class="fas fa-credit-card"></i>
+              <i class="fas fa-rupee-sign"></i>
               <span>Payments</span>
             </a>
           </li>
         </ul>
       </div>
-    </div>
+    </div>v
 
     <div class="sidebar-footer">
       <div class="user-info">

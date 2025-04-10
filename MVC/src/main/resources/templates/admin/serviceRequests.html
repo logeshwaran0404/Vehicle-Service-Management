@@ -1510,25 +1510,24 @@
                 <div class="nav-section-title">Main</div>
                 <ul class="sidebar-menu">
                     <li class="sidebar-menu-item">
-                        <a th:href="@{/admin/dashboard}" class="sidebar-menu-link">
+                        <a href="#" class="sidebar-menu-link active">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
-                    </li>
+
                 </ul>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Management</div>
                 <ul class="sidebar-menu">
-                    <li class="sidebar-menu-item">
-                        <a th:href="@{/admin/service-requests}" class="sidebar-menu-link active">
-                            <i class="fas fa-clipboard-list"></i>
-                            <span>Service Requests</span>
-                        </a>
                     </li>
+                    <a th:href="@{/admin/service-requests}" class="sidebar-menu-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Service Requests</span>
+                    </a>
                     <li class="sidebar-menu-item">
-                        <a th:href="@{/admin/vehicles}" class="sidebar-menu-link">
+                        <a href="#" class="sidebar-menu-link">
                             <i class="fas fa-car"></i>
                             <span>Vehicles</span>
                         </a>
@@ -1551,6 +1550,7 @@
                             <span>Inventory</span>
                         </a>
                     </li>
+
                     <li class="sidebar-menu-item">
                         <a href="#" class="sidebar-menu-link">
                             <i class="fas fa-tools"></i>
@@ -1951,6 +1951,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // Service Requests Page JavaScript
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize app
         initializeApp();
@@ -1983,38 +1984,102 @@
 
         // Add CSS for membership filters
         addMembershipFilterStyles();
+
+        // Set current date if element exists
+        setupDateDisplay();
     }
 
     function setupMobileMenu() {
-        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+        }
     }
 
     function setupLogout() {
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            // Clear storage
-            localStorage.removeItem("jwt-token");
-            sessionStorage.removeItem("jwt-token");
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                // Show confirmation dialog
+                if (confirm('Are you sure you want to logout?')) {
+                    // Clear storage
+                    localStorage.removeItem("jwt-token");
+                    sessionStorage.removeItem("jwt-token");
+                    localStorage.removeItem("user-role");
+                    localStorage.removeItem("user-name");
+                    sessionStorage.removeItem("user-role");
+                    sessionStorage.removeItem("user-name");
 
-            // Redirect to logout
-            window.location.href = '/admin/logout';
-        });
+                    // Redirect to logout
+                    window.location.href = '/admin/logout';
+                }
+            });
+        }
+    }
+
+    function setupDateDisplay() {
+        const dateElement = document.getElementById('current-date');
+        if (dateElement) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            dateElement.textContent = today.toLocaleDateString('en-US', options);
+        }
     }
 
     function setupAuthentication() {
-        // Check if token exists
-        const token = getToken();
-        if (!token) {
+        // Get token from storage
+        const tokenFromStorage = localStorage.getItem("jwt-token") || sessionStorage.getItem("jwt-token");
+
+        if (tokenFromStorage) {
+            console.log("Token found in storage");
+
+            // Check if current URL already has a token parameter
+            const currentUrl = new URL(window.location.href);
+            const urlToken = currentUrl.searchParams.get('token');
+
+            // If URL doesn't have the token, update all navigation links
+            if (!urlToken) {
+                // Add token to all sidebar navigation links
+                document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.includes('token=')) {
+                        const separator = href.includes('?') ? '&' : '?';
+                        link.setAttribute('href', href + separator + 'token=' + encodeURIComponent(tokenFromStorage));
+                    }
+                });
+
+                // Add token to current URL for refresh protection
+                if (window.location.href.indexOf('token=') === -1) {
+                    const separator = window.location.href.indexOf('?') === -1 ? '?' : '&';
+                    const newUrl = window.location.href + separator + 'token=' + encodeURIComponent(tokenFromStorage);
+                    window.history.replaceState({}, document.title, newUrl);
+                }
+            }
+        } else {
+            console.warn("No token found in storage");
+            // If no token is found, redirect to login
             window.location.href = '/admin/login?error=session_expired';
         }
     }
 
     function setupEventListeners() {
         // Search functionality
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            filterServiceRequests(this.value);
-        });
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                filterServiceRequests(this.value);
+            });
+        }
+
+        // Table search
+        const tableSearchInput = document.querySelector('.search-input-sm');
+        if (tableSearchInput) {
+            tableSearchInput.addEventListener('keyup', function() {
+                filterTableRows(this.value);
+            });
+        }
 
         // Pagination
         document.querySelectorAll('#pagination .page-link').forEach(link => {
@@ -2027,40 +2092,55 @@
             }
         });
 
-        document.getElementById('prevBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (currentPage > 1) {
-                changePage(currentPage - 1);
-            }
-        });
+        const prevBtn = document.getElementById('prevBtn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    changePage(currentPage - 1);
+                }
+            });
+        }
 
-        document.getElementById('nextBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            const totalPages = Math.ceil(serviceRequests.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                changePage(currentPage + 1);
-            }
-        });
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const totalPages = Math.ceil(serviceRequests.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    changePage(currentPage + 1);
+                }
+            });
+        }
 
         // Add Service Request Form
-        document.getElementById('customerId').addEventListener('change', function() {
-            const customerId = this.value;
-            if (customerId) {
-                loadVehiclesForCustomer(customerId);
-            } else {
-                resetVehicleDropdown();
-            }
-        });
+        const customerIdSelect = document.getElementById('customerId');
+        if (customerIdSelect) {
+            customerIdSelect.addEventListener('change', function() {
+                const customerId = this.value;
+                if (customerId) {
+                    loadVehiclesForCustomer(customerId);
+                } else {
+                    resetVehicleDropdown();
+                }
+            });
+        }
 
         // Save service request
-        document.getElementById('saveServiceRequestBtn').addEventListener('click', function() {
-            saveServiceRequest();
-        });
+        const saveServiceRequestBtn = document.getElementById('saveServiceRequestBtn');
+        if (saveServiceRequestBtn) {
+            saveServiceRequestBtn.addEventListener('click', function() {
+                saveServiceRequest();
+            });
+        }
 
         // Assign service advisor
-        document.getElementById('confirmAssignBtn').addEventListener('click', function() {
-            assignServiceAdvisor();
-        });
+        const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+        if (confirmAssignBtn) {
+            confirmAssignBtn.addEventListener('click', function() {
+                assignServiceAdvisor();
+            });
+        }
     }
 
     // API Functions
@@ -2069,11 +2149,17 @@
     }
 
     function showSpinner() {
-        document.getElementById('spinnerOverlay').classList.add('show');
+        const spinnerOverlay = document.getElementById('spinnerOverlay');
+        if (spinnerOverlay) {
+            spinnerOverlay.classList.add('show');
+        }
     }
 
     function hideSpinner() {
-        document.getElementById('spinnerOverlay').classList.remove('show');
+        const spinnerOverlay = document.getElementById('spinnerOverlay');
+        if (spinnerOverlay) {
+            spinnerOverlay.classList.remove('show');
+        }
     }
 
     function loadServiceRequests() {
@@ -2096,7 +2182,11 @@
             })
             .then(data => {
                 hideSpinner();
-                document.getElementById('loading-row').style.display = 'none';
+
+                const loadingRow = document.getElementById('loading-row');
+                if (loadingRow) {
+                    loadingRow.style.display = 'none';
+                }
 
                 if (data && data.length > 0) {
                     // Process membership status for each service request
@@ -2115,14 +2205,27 @@
                     // Add membership filters after loading data
                     addMembershipFilters();
                 } else {
-                    document.getElementById('empty-row').style.display = 'table-row';
+                    const emptyRow = document.getElementById('empty-row');
+                    if (emptyRow) {
+                        emptyRow.style.display = 'table-row';
+                    }
                 }
             })
             .catch(error => {
                 hideSpinner();
-                document.getElementById('loading-row').style.display = 'none';
-                document.getElementById('empty-row').style.display = 'table-row';
+
+                const loadingRow = document.getElementById('loading-row');
+                if (loadingRow) {
+                    loadingRow.style.display = 'none';
+                }
+
+                const emptyRow = document.getElementById('empty-row');
+                if (emptyRow) {
+                    emptyRow.style.display = 'table-row';
+                }
+
                 console.error('Error loading service requests:', error);
+                showToast('Failed to load service requests. Please try again.', 'error');
             });
 
         // Load customers and service advisors for forms
@@ -2138,7 +2241,13 @@
                 'Authorization': 'Bearer ' + getToken()
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    throw new Error('Session expired');
+                }
+                return response.json();
+            })
             .then(data => {
                 customers = data;
                 populateCustomerDropdown();
@@ -2156,7 +2265,13 @@
                 'Authorization': 'Bearer ' + getToken()
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    throw new Error('Session expired');
+                }
+                return response.json();
+            })
             .then(data => {
                 serviceAdvisors = data;
             })
@@ -2167,40 +2282,55 @@
 
     function loadVehiclesForCustomer(customerId) {
         const vehicleDropdown = document.getElementById('vehicleId');
-        vehicleDropdown.disabled = true;
-        vehicleDropdown.innerHTML = '<option value="">Loading vehicles...</option>';
+        if (vehicleDropdown) {
+            vehicleDropdown.disabled = true;
+            vehicleDropdown.innerHTML = '<option value="">Loading vehicles...</option>';
 
-        fetch(`/admin/api/customers/${customerId}/vehicles`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getToken()
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                vehicles = data;
-                populateVehicleDropdown(data);
+            fetch(`/admin/api/customers/${customerId}/vehicles`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                }
             })
-            .catch(error => {
-                console.error('Error loading vehicles:', error);
-                resetVehicleDropdown();
-            });
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = '/admin/login?error=session_expired';
+                        throw new Error('Session expired');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    vehicles = data;
+                    populateVehicleDropdown(data);
+                })
+                .catch(error => {
+                    console.error('Error loading vehicles:', error);
+                    resetVehicleDropdown();
+                });
+        }
     }
 
     function renderServiceRequests() {
         const tableBody = document.getElementById('serviceRequestsTableBody');
+        if (!tableBody) return;
 
         // Clear table body except for special rows
         const rows = tableBody.querySelectorAll('tr:not(#loading-row):not(#empty-row)');
         rows.forEach(row => row.remove());
 
         if (serviceRequests.length === 0) {
-            document.getElementById('empty-row').style.display = 'table-row';
+            const emptyRow = document.getElementById('empty-row');
+            if (emptyRow) {
+                emptyRow.style.display = 'table-row';
+            }
             return;
         }
 
-        document.getElementById('empty-row').style.display = 'none';
+        const emptyRow = document.getElementById('empty-row');
+        if (emptyRow) {
+            emptyRow.style.display = 'none';
+        }
 
         // Get requests for current page
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -2215,60 +2345,60 @@
             const row = document.createElement('tr');
             row.className = 'active-page';
             row.innerHTML = `
-            <td>REQ-${request.requestId}</td>
-            <td>
-                <div class="vehicle-info">
-                    <div class="vehicle-icon">
-                        <i class="fas fa-${request.vehicleCategory === 'Bike' ? 'motorcycle' : 'car-side'}"></i>
-                    </div>
-                    <div class="vehicle-details">
-                        <h5>${request.vehicleName}</h5>
-                        <p>${request.registrationNumber}</p>
-                    </div>
+        <td>REQ-${request.requestId}</td>
+        <td>
+            <div class="vehicle-info">
+                <div class="vehicle-icon">
+                    <i class="fas fa-${request.vehicleCategory === 'Bike' ? 'motorcycle' : 'car-side'}"></i>
                 </div>
-            </td>
-            <td>
-                <div class="person-info">
-                    <div class="person-details">
-                        <h5>${request.customerName}</h5>
-                        <p>${request.customerEmail || ''}</p>
-                    </div>
+                <div class="vehicle-details">
+                    <h5>${request.vehicleName || request.vehicleBrand + ' ' + request.vehicleModel}</h5>
+                    <p>${request.registrationNumber}</p>
                 </div>
-            </td>
-            <td>
-                <span class="membership-badge membership-${membershipStatus.toLowerCase()}">
-                    <i class="fas fa-${membershipStatus === 'Premium' ? 'crown' : 'user'}"></i>
-                    ${membershipStatus}
-                </span>
-            </td>
-            <td>${request.serviceType}</td>
-            <td>
-                <span class="status-badge status-${request.status.toLowerCase()}">
-                    <i class="fas fa-${
+            </div>
+        </td>
+        <td>
+            <div class="person-info">
+                <div class="person-details">
+                    <h5>${request.customerName}</h5>
+                    <p>${request.customerEmail || ''}</p>
+                </div>
+            </div>
+        </td>
+        <td>
+            <span class="membership-badge membership-${membershipStatus.toLowerCase()}">
+                <i class="fas fa-${membershipStatus === 'Premium' ? 'crown' : 'user'}"></i>
+                ${membershipStatus}
+            </span>
+        </td>
+        <td>${request.serviceType}</td>
+        <td>
+            <span class="status-badge status-${request.status.toLowerCase()}">
+                <i class="fas fa-${
                 request.status === 'Received' ? 'clock' :
                     request.status === 'Diagnosis' ? 'stethoscope' :
                         request.status === 'Repair' ? 'wrench' :
                             'check-circle'
             }"></i>
-                    ${request.status}
-                </span>
-            </td>
-            <td>${formatDate(request.deliveryDate)}</td>
-            <td>${request.serviceAdvisorName || 'Not Assigned'}</td>
-            <td class="table-actions-cell">
-                <button class="btn-table-action view-btn" title="View Details" onclick="showServiceRequestDetails(${request.requestId})">
-                    <i class="fas fa-eye"></i>
-                </button>
-                ${!request.serviceAdvisorId ?
+                ${request.status}
+            </span>
+        </td>
+        <td>${formatDate(request.deliveryDate)}</td>
+        <td>${request.serviceAdvisorName || 'Not Assigned'}</td>
+        <td class="table-actions-cell">
+            <button class="btn-table-action view-btn" title="View Details" onclick="showServiceRequestDetails(${request.requestId})">
+                <i class="fas fa-eye"></i>
+            </button>
+            ${!request.serviceAdvisorId ?
                 `<button class="btn-assign" title="Assign Advisor" onclick="showAssignAdvisorModal(${request.requestId})">
-                        <i class="fas fa-user-plus"></i> Assign
-                    </button>` :
+                    <i class="fas fa-user-plus"></i> Assign
+                </button>` :
                 `<button class="btn-table-action edit-btn" title="Edit Request">
-                        <i class="fas fa-edit"></i>
-                    </button>`
+                    <i class="fas fa-edit"></i>
+                </button>`
             }
-            </td>
-        `;
+        </td>
+    `;
 
             tableBody.appendChild(row);
         });
@@ -2289,9 +2419,11 @@
         const tableActions = document.querySelector('.table-actions');
 
         if (tableActions) {
-            const filterDiv = document.createElement('div');
-            filterDiv.className = 'membership-filters ms-2';
-            filterDiv.innerHTML = `
+            // Check if filters already exist
+            if (!tableActions.querySelector('.membership-filters')) {
+                const filterDiv = document.createElement('div');
+                filterDiv.className = 'membership-filters ms-2';
+                filterDiv.innerHTML = `
             <div class="btn-group" role="group" aria-label="Membership filters">
                 <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter="All">All</button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="Standard">Standard</button>
@@ -2299,26 +2431,30 @@
             </div>
         `;
 
-            tableActions.appendChild(filterDiv);
+                tableActions.appendChild(filterDiv);
 
-            // Add event listeners to filter buttons
-            const filterButtons = filterDiv.querySelectorAll('button');
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    // Filter service requests
-                    filterByMembership(this.getAttribute('data-filter'));
+                // Add event listeners to filter buttons
+                const filterButtons = filterDiv.querySelectorAll('button');
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        // Add active class to clicked button
+                        this.classList.add('active');
+                        // Filter service requests
+                        filterByMembership(this.getAttribute('data-filter'));
+                    });
                 });
-            });
+            }
         }
     }
 
     function addMembershipFilterStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
+        // Check if styles already exist
+        if (!document.getElementById('membership-filter-styles')) {
+            const style = document.createElement('style');
+            style.id = 'membership-filter-styles';
+            style.textContent = `
         .membership-filters {
             display: flex;
             align-items: center;
@@ -2343,7 +2479,8 @@
             border-color: var(--wine);
         }
     `;
-        document.head.appendChild(style);
+            document.head.appendChild(style);
+        }
     }
 
     function filterServiceRequests(searchTerm) {
@@ -2357,17 +2494,40 @@
         const filteredRequests = serviceRequests.filter(request => {
             return (
                 `req-${request.requestId}`.toLowerCase().includes(searchTerm) ||
-                request.customerName.toLowerCase().includes(searchTerm) ||
-                request.registrationNumber.toLowerCase().includes(searchTerm) ||
-                request.vehicleName.toLowerCase().includes(searchTerm) ||
-                request.serviceType.toLowerCase().includes(searchTerm) ||
-                request.status.toLowerCase().includes(searchTerm)
+                (request.customerName && request.customerName.toLowerCase().includes(searchTerm)) ||
+                (request.registrationNumber && request.registrationNumber.toLowerCase().includes(searchTerm)) ||
+                (request.vehicleName && request.vehicleName.toLowerCase().includes(searchTerm)) ||
+                (request.vehicleBrand && request.vehicleBrand.toLowerCase().includes(searchTerm)) ||
+                (request.vehicleModel && request.vehicleModel.toLowerCase().includes(searchTerm)) ||
+                (request.serviceType && request.serviceType.toLowerCase().includes(searchTerm)) ||
+                (request.status && request.status.toLowerCase().includes(searchTerm))
             );
         });
 
         currentPage = 1;
         renderServiceRequests(filteredRequests);
         setupPagination();
+    }
+
+    function filterTableRows(searchTerm) {
+        if (!searchTerm) {
+            // Reset all rows
+            document.querySelectorAll('#serviceRequestsTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+            return;
+        }
+
+        searchTerm = searchTerm.toLowerCase();
+
+        document.querySelectorAll('#serviceRequestsTable tbody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     }
 
     function changePage(page) {
@@ -2379,71 +2539,92 @@
     function setupPagination() {
         const totalPages = Math.ceil(serviceRequests.length / itemsPerPage);
         const pagination = document.getElementById('pagination');
+        if (!pagination) return;
 
         // Clear existing page links except for prev/next buttons
         const pageLinks = pagination.querySelectorAll('.page-link:not(#prevBtn):not(#nextBtn)');
         pageLinks.forEach(link => link.parentElement.remove());
 
         // Add page links
-        const prevBtn = document.getElementById('prevBtn').parentElement;
-        const nextBtn = document.getElementById('nextBtn').parentElement;
+        const prevBtn = document.getElementById('prevBtn');
+        const prevBtnParent = prevBtn ? prevBtn.parentElement : null;
+        const nextBtn = document.getElementById('nextBtn');
+        const nextBtnParent = nextBtn ? nextBtn.parentElement : null;
 
-        for (let i = 1; i <= totalPages; i++) {
-            const li = document.createElement('li');
-            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+        if (prevBtnParent && nextBtnParent) {
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
 
-            // Add event listener
-            li.querySelector('.page-link').addEventListener('click', function(e) {
-                e.preventDefault();
-                changePage(i);
-            });
+                // Add event listener
+                li.querySelector('.page-link').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    changePage(i);
+                });
 
-            pagination.insertBefore(li, nextBtn);
+                pagination.insertBefore(li, nextBtnParent);
+            }
+
+            // Update prev/next buttons
+            prevBtnParent.classList.toggle('disabled', currentPage === 1);
+            nextBtnParent.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
         }
-
-        // Update prev/next buttons
-        document.getElementById('prevBtn').parentElement.classList.toggle('disabled', currentPage === 1);
-        document.getElementById('nextBtn').parentElement.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
     }
 
     function updatePaginationUI() {
         const totalPages = Math.ceil(serviceRequests.length / itemsPerPage);
+        const pagination = document.getElementById('pagination');
+        if (!pagination) return;
 
         // Update active page
-        document.querySelectorAll('#pagination .page-item').forEach(item => {
-            if (!item.querySelector('#prevBtn') && !item.querySelector('#nextBtn')) {
-                const page = parseInt(item.querySelector('.page-link').getAttribute('data-page'));
+        const pageItems = pagination.querySelectorAll('.page-item');
+        pageItems.forEach(item => {
+            const pageLink = item.querySelector('.page-link');
+            if (pageLink && pageLink.id !== 'prevBtn' && pageLink.id !== 'nextBtn') {
+                const page = parseInt(pageLink.getAttribute('data-page'));
                 item.classList.toggle('active', page === currentPage);
             }
         });
 
         // Update prev/next buttons
-        document.getElementById('prevBtn').parentElement.classList.toggle('disabled', currentPage === 1);
-        document.getElementById('nextBtn').parentElement.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (prevBtn) {
+            prevBtn.parentElement.classList.toggle('disabled', currentPage === 1);
+        }
+
+        if (nextBtn) {
+            nextBtn.parentElement.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+        }
     }
 
     function populateCustomerDropdown() {
         const dropdown = document.getElementById('customerId');
+        if (!dropdown) return;
+
         dropdown.innerHTML = '<option value="">Select Customer</option>';
 
         customers.forEach(customer => {
             const option = document.createElement('option');
-            option.value = customer.id;
-            option.textContent = `${customer.name} (${customer.membershipStatus || 'Standard'})`;
+            option.value = customer.customerId || customer.id;
+            option.textContent = `${customer.firstName || ''} ${customer.lastName || ''} (${customer.membershipStatus || 'Standard'})`;
             dropdown.appendChild(option);
         });
     }
 
     function populateVehicleDropdown(vehicles) {
         const dropdown = document.getElementById('vehicleId');
+        if (!dropdown) return;
+
         dropdown.innerHTML = '<option value="">Select Vehicle</option>';
 
         if (vehicles && vehicles.length > 0) {
             vehicles.forEach(vehicle => {
                 const option = document.createElement('option');
-                option.value = vehicle.id;
-                option.textContent = `${vehicle.make} ${vehicle.model} (${vehicle.registrationNumber})`;
+                option.value = vehicle.vehicleId || vehicle.id;
+                option.textContent = `${vehicle.brand || vehicle.make} ${vehicle.model} (${vehicle.registrationNumber})`;
                 dropdown.appendChild(option);
             });
             dropdown.disabled = false;
@@ -2455,12 +2636,15 @@
 
     function resetVehicleDropdown() {
         const dropdown = document.getElementById('vehicleId');
-        dropdown.innerHTML = '<option value="">Select Customer First</option>';
-        dropdown.disabled = true;
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="">Select Customer First</option>';
+            dropdown.disabled = true;
+        }
     }
 
     function saveServiceRequest() {
         const form = document.getElementById('addServiceRequestForm');
+        if (!form) return;
 
         if (!form.checkValidity()) {
             form.reportValidity();
@@ -2486,6 +2670,11 @@
             body: JSON.stringify(serviceRequest)
         })
             .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    throw new Error('Session expired');
+                }
+
                 if (!response.ok) {
                     throw new Error('Failed to create service request');
                 }
@@ -2496,7 +2685,9 @@
 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addServiceRequestModal'));
-                modal.hide();
+                if (modal) {
+                    modal.hide();
+                }
 
                 // Reset form
                 form.reset();
@@ -2512,7 +2703,7 @@
             .catch(error => {
                 hideSpinner();
                 console.error('Error creating service request:', error);
-                alert('Failed to create service request. Please try again.');
+                showToast('Failed to create service request. Please try again.', 'error');
             });
     }
 
@@ -2525,7 +2716,7 @@
         }
 
         // Set request details in the modal
-        document.getElementById('assignVehicleName').textContent = request.vehicleName;
+        document.getElementById('assignVehicleName').textContent = request.vehicleName || `${request.vehicleBrand} ${request.vehicleModel}`;
         document.getElementById('assignVehicleReg').textContent = request.registrationNumber;
         document.getElementById('assignCustomerName').textContent = request.customerName;
         document.getElementById('assignRequestId').textContent = `REQ-${request.requestId}`;
@@ -2541,6 +2732,7 @@
 
     function populateServiceAdvisorsList() {
         const advisorsList = document.getElementById('advisorsList');
+        if (!advisorsList) return;
 
         if (!serviceAdvisors || serviceAdvisors.length === 0) {
             advisorsList.innerHTML = `
@@ -2556,8 +2748,8 @@
 
         serviceAdvisors.forEach(advisor => {
             // Calculate workload percentage (example)
-            const workloadPercentage = advisor.activeRequests ?
-                Math.min(Math.round((advisor.activeRequests / advisor.maxCapacity) * 100), 100) : 0;
+            const workloadPercentage = advisor.workloadPercentage ||
+                (advisor.activeServices ? Math.min(Math.round((advisor.activeServices / 10) * 100), 100) : 0);
 
             // Determine workload class
             let workloadClass = 'bg-success';
@@ -2567,21 +2759,27 @@
                 workloadClass = 'bg-warning';
             }
 
+            const name = advisor.firstName && advisor.lastName ?
+                `${advisor.firstName} ${advisor.lastName}` : advisor.name || 'Unnamed Advisor';
+
+            const initials = (advisor.firstName ? advisor.firstName.charAt(0) : '') +
+                (advisor.lastName ? advisor.lastName.charAt(0) : '');
+
             html += `
-            <div class="advisor-card" data-advisor-id="${advisor.id}">
+            <div class="advisor-card" data-advisor-id="${advisor.advisorId || advisor.id}">
                 <div class="advisor-avatar">
-                    ${advisor.name.charAt(0)}
+                    ${initials || 'SA'}
                 </div>
                 <div class="advisor-info">
-                    <div class="advisor-name">${advisor.name}</div>
+                    <div class="advisor-name">${name}</div>
                     <div class="advisor-meta">
                         <div class="advisor-stat">
                             <i class="fas fa-clipboard-list"></i>
-                            ${advisor.activeRequests || 0} active requests
+                            ${advisor.activeServices || 0} active requests
                         </div>
                         <div class="advisor-stat">
-                            <i class="fas fa-star"></i>
-                            ${advisor.rating || 4.5} rating
+                            <i class="fas fa-id-badge"></i>
+                            ${advisor.formattedId || `SA-${String(advisor.advisorId || 0).padStart(3, '0')}`}
                         </div>
                     </div>
                     <div class="advisor-services">
@@ -2620,7 +2818,7 @@
         const selectedAdvisor = document.querySelector('.advisor-card.selected');
 
         if (!selectedAdvisor) {
-            alert('Please select a service advisor');
+            showToast('Please select a service advisor', 'error');
             return;
         }
 
@@ -2628,15 +2826,19 @@
 
         showSpinner();
 
-        fetch(`/admin/api/service-requests/${requestId}/assign`, {
-            method: 'POST',
+        fetch(`/admin/api/service-requests/${requestId}/assign?advisorId=${advisorId}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + getToken()
-            },
-            body: JSON.stringify({ serviceAdvisorId: advisorId })
+            }
         })
             .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    throw new Error('Session expired');
+                }
+
                 if (!response.ok) {
                     throw new Error('Failed to assign service advisor');
                 }
@@ -2647,7 +2849,9 @@
 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('assignAdvisorModal'));
-                modal.hide();
+                if (modal) {
+                    modal.hide();
+                }
 
                 // Show success message
                 showSuccessModal('Service Advisor Assigned', 'The service advisor has been assigned successfully.');
@@ -2662,11 +2866,12 @@
             .catch(error => {
                 hideSpinner();
                 console.error('Error assigning service advisor:', error);
-                alert('Failed to assign service advisor. Please try again.');
+                showToast('Failed to assign service advisor. Please try again.', 'error');
             });
     }
 
-    function showServiceRequestDetails(requestId) {
+    // Function to show service request details - needs to be globally accessible for onclick handlers
+    window.showServiceRequestDetails = function(requestId) {
         const request = serviceRequests.find(req => req.requestId === requestId);
 
         if (!request) {
@@ -2691,8 +2896,8 @@
         </span>
     `;
 
-        document.getElementById('viewCreatedDate').textContent = formatDate(request.createdDate);
-        document.getElementById('viewVehicleName').textContent = request.vehicleName;
+        document.getElementById('viewCreatedDate').textContent = formatDate(request.createdAt || new Date().toISOString());
+        document.getElementById('viewVehicleName').textContent = request.vehicleName || `${request.vehicleBrand} ${request.vehicleModel}`;
         document.getElementById('viewRegistrationNumber').textContent = request.registrationNumber;
         document.getElementById('viewVehicleCategory').textContent = request.vehicleCategory || 'Car';
         document.getElementById('viewCustomerName').textContent = request.customerName;
@@ -2715,20 +2920,29 @@
 
         // Show materials section if available
         const materialsSection = document.getElementById('materialsSection');
-        if (request.materials && request.materials.length > 0) {
-            materialsSection.style.display = 'block';
-            populateMaterialsTable(request.materials);
-        } else {
-            materialsSection.style.display = 'none';
+        if (materialsSection) {
+            if (request.materials && request.materials.length > 0) {
+                materialsSection.style.display = 'block';
+                populateMaterialsTable(request.materials);
+            } else {
+                materialsSection.style.display = 'none';
+            }
         }
 
         // Show modal
         const modal = new bootstrap.Modal(document.getElementById('viewServiceRequestModal'));
         modal.show();
-    }
+    };
+
+    // Function to show assign advisor modal - needs to be globally accessible for onclick handlers
+    window.showAssignAdvisorModal = function(requestId) {
+        showAssignAdvisorModal(requestId);
+    };
 
     function populateMaterialsTable(materials) {
         const tableBody = document.getElementById('materialsTableBody');
+        if (!tableBody) return;
+
         tableBody.innerHTML = '';
 
         let totalCost = 0;
@@ -2765,6 +2979,45 @@
 
         const modal = new bootstrap.Modal(document.getElementById('successModal'));
         modal.show();
+    }
+
+    function showToast(message, type = 'success') {
+        // Create toast container if it doesn't exist
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Create toast element
+        const toastId = 'toast-' + Date.now();
+        const toastHTML = `
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+            <div class="toast-header">
+                <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+        // Initialize and show toast
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+        });
+        toast.show();
+
+        // Remove toast after it's hidden
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            toastElement.remove();
+        });
     }
 
     function formatDate(dateString) {
