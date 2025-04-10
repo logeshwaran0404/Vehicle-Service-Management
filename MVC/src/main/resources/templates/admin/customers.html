@@ -1384,7 +1384,7 @@
         <div class="nav-section-title">Main</div>
         <ul class="sidebar-menu">
           <li class="sidebar-menu-item">
-            <a href="#" class="sidebar-menu-link active">
+            <a href="#" class="sidebar-menu-link ">
               <i class="fas fa-tachometer-alt"></i>
               <span>Dashboard</span>
             </a>
@@ -1395,11 +1395,12 @@
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
         <ul class="sidebar-menu">
+          <li class="sidebar-menu-item">
+            <a th:href="@{/admin/service-requests}" class="sidebar-menu-link">
+              <i class="fas fa-clipboard-list"></i>
+              <span>Service Requests</span>
+            </a>
           </li>
-          <a th:href="@{/admin/service-requests}" class="sidebar-menu-link">
-            <i class="fas fa-clipboard-list"></i>
-            <span>Service Requests</span>
-          </a>
           <li class="sidebar-menu-item">
             <a href="#" class="sidebar-menu-link">
               <i class="fas fa-car"></i>
@@ -1407,7 +1408,7 @@
             </a>
           </li>
           <li class="sidebar-menu-item">
-            <a th:href="@{/admin/customers}" class="sidebar-menu-link">
+            <a th:href="@{/admin/customers}" class="sidebar-menu-link active">
               <i class="fas fa-users"></i>
               <span>Customers</span>
             </a>

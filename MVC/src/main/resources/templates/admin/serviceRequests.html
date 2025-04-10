@@ -1510,7 +1510,7 @@
                 <div class="nav-section-title">Main</div>
                 <ul class="sidebar-menu">
                     <li class="sidebar-menu-item">
-                        <a href="#" class="sidebar-menu-link active">
+                        <a href="#" class="sidebar-menu-link">
                             <i class="fas fa-tachometer-alt"></i>
                             <span>Dashboard</span>
                         </a>
@@ -1521,11 +1521,12 @@
             <div class="nav-section">
                 <div class="nav-section-title">Management</div>
                 <ul class="sidebar-menu">
+                    <li class="sidebar-menu-item">
+                        <a th:href="@{/admin/service-requests}" class="sidebar-menu-link active">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Service Requests</span>
+                        </a>
                     </li>
-                    <a th:href="@{/admin/service-requests}" class="sidebar-menu-link">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span>Service Requests</span>
-                    </a>
                     <li class="sidebar-menu-item">
                         <a href="#" class="sidebar-menu-link">
                             <i class="fas fa-car"></i>
@@ -1716,10 +1717,58 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="vehicleId">Vehicle <span class="text-danger">*</span></label>
-                            <select class="form-select" id="vehicleId" name="vehicleId" required disabled>
-                                <option value="">Select Vehicle</option>
-                                <!-- Will be populated based on selected customer -->
-                            </select>
+                            <div class="d-flex gap-2">
+                                <select class="form-select" id="vehicleId" name="vehicleId" required disabled>
+                                    <option value="">Select Vehicle</option>
+                                    <!-- Will be populated based on selected customer -->
+                                </select>
+                                <button type="button" class="btn-premium secondary" id="addNewVehicleBtn" disabled>
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="newVehicleForm" style="display: none;" class="mt-3 p-3 border rounded bg-light">
+                        <h5 class="mb-3"><i class="fas fa-car-side me-2"></i>Add New Vehicle</h5>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleBrand">Brand <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="vehicleBrand" name="vehicleBrand" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleModel">Model <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="vehicleModel" name="vehicleModel" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleRegNumber">Registration Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="vehicleRegNumber" name="vehicleRegNumber" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleCategory">Category <span class="text-danger">*</span></label>
+                                <select class="form-select" id="vehicleCategory" name="vehicleCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Car">Car</option>
+                                    <option value="Bike">Bike</option>
+                                    <option value="Truck">Truck</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleYear">Year <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="vehicleYear" name="vehicleYear" min="1900" max="2099" required>
+                            </div>
+                        </div>
+                        <div class="text-end mt-3">
+                            <button type="button" class="btn-premium secondary" id="cancelNewVehicleBtn">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button type="button" class="btn-premium primary" id="saveNewVehicleBtn">
+                                <i class="fas fa-save"></i> Save Vehicle
+                            </button>
                         </div>
                     </div>
 
@@ -2256,6 +2305,134 @@
                 console.error('Error loading customers:', error);
             });
     }
+    // Add to your setupEventListeners function
+    function setupEventListeners() {
+        // Existing code...
+
+        // Add New Vehicle button
+        const addNewVehicleBtn = document.getElementById('addNewVehicleBtn');
+        if (addNewVehicleBtn) {
+            addNewVehicleBtn.addEventListener('click', function() {
+                document.getElementById('newVehicleForm').style.display = 'block';
+            });
+        }
+
+        // Cancel New Vehicle button
+        const cancelNewVehicleBtn = document.getElementById('cancelNewVehicleBtn');
+        if (cancelNewVehicleBtn) {
+            cancelNewVehicleBtn.addEventListener('click', function() {
+                document.getElementById('newVehicleForm').style.display = 'none';
+            });
+        }
+
+        // Save New Vehicle button
+        const saveNewVehicleBtn = document.getElementById('saveNewVehicleBtn');
+        if (saveNewVehicleBtn) {
+            saveNewVehicleBtn.addEventListener('click', function() {
+                saveNewVehicle();
+            });
+        }
+
+        // Enable "Add New Vehicle" button when customer is selected
+        const customerIdSelect = document.getElementById('customerId');
+        if (customerIdSelect) {
+            customerIdSelect.addEventListener('change', function() {
+                const customerId = this.value;
+                const addNewVehicleBtn = document.getElementById('addNewVehicleBtn');
+
+                if (customerId) {
+                    loadVehiclesForCustomer(customerId);
+                    addNewVehicleBtn.disabled = false;
+                } else {
+                    resetVehicleDropdown();
+                    addNewVehicleBtn.disabled = true;
+                    document.getElementById('newVehicleForm').style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // Add this new function
+    function saveNewVehicle() {
+        const customerId = document.getElementById('customerId').value;
+
+        if (!customerId) {
+            showToast('Please select a customer first', 'error');
+            return;
+        }
+
+        // Validate form
+        const brand = document.getElementById('vehicleBrand').value;
+        const model = document.getElementById('vehicleModel').value;
+        const regNumber = document.getElementById('vehicleRegNumber').value;
+        const category = document.getElementById('vehicleCategory').value;
+        const year = document.getElementById('vehicleYear').value;
+
+        if (!brand || !model || !regNumber || !category || !year) {
+            showToast('Please fill all required fields', 'error');
+            return;
+        }
+
+        const vehicleData = {
+            customerId: customerId,
+            brand: brand,
+            model: model,
+            registrationNumber: regNumber,
+            category: category,
+            year: year
+        };
+
+        showSpinner();
+
+        // API call to create new vehicle
+        fetch('/admin/api/customers/' + customerId + '/vehicles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getToken()
+            },
+            body: JSON.stringify(vehicleData)
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/admin/login?error=session_expired';
+                    throw new Error('Session expired');
+                }
+                return response.json();
+            })
+            .then(data => {
+                hideSpinner();
+
+                // Add new vehicle to the vehicles array
+                vehicles.push(data);
+
+                // Update dropdown and select the new vehicle
+                const dropdown = document.getElementById('vehicleId');
+                const option = document.createElement('option');
+                option.value = data.vehicleId || data.id;
+                option.textContent = `${data.brand} ${data.model} (${data.registrationNumber})`;
+                dropdown.appendChild(option);
+                dropdown.value = data.vehicleId || data.id;
+
+                // Hide the form
+                document.getElementById('newVehicleForm').style.display = 'none';
+
+                // Clear form fields
+                document.getElementById('vehicleBrand').value = '';
+                document.getElementById('vehicleModel').value = '';
+                document.getElementById('vehicleRegNumber').value = '';
+                document.getElementById('vehicleCategory').value = '';
+                document.getElementById('vehicleYear').value = '';
+
+                showToast('Vehicle added successfully', 'success');
+            })
+            .catch(error => {
+                hideSpinner();
+                console.error('Error saving vehicle:', error);
+                showToast('Failed to create vehicle. Please try again.', 'error');
+            });
+    }
+
 
     function loadServiceAdvisors() {
         fetch('/admin/api/service-advisors', {
