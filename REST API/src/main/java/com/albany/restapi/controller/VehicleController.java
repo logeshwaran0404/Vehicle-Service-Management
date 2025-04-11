@@ -83,47 +83,40 @@ public class VehicleController {
 
             log.debug("Attempting to create vehicle for customer ID: {}", customerId);
 
-            // First check if CustomerProfile exists directly by ID
-            Optional<CustomerProfile> customerOpt = customerProfileRepository.findById(customerId);
+            // First check if User exists
+            Optional<User> userOpt = userRepository.findById(customerId);
+            User user = null;
             CustomerProfile customer = null;
 
-            if (customerOpt.isPresent()) {
-                log.debug("Found CustomerProfile with ID: {}", customerId);
-                customer = customerOpt.get();
-            } else {
-                log.debug("No CustomerProfile found with ID: {}, checking for User", customerId);
+            if (userOpt.isPresent()) {
+                user = userOpt.get();
+                log.debug("Found User with ID: {}, role: {}", customerId, user.getRole());
 
-                // Try to find by user ID from CustomerProfile table
-                CustomerProfile customerByUserId = customerProfileRepository.findByUserId(customerId);
+                // Look for existing CustomerProfile
+                customer = customerProfileRepository.findByUserId(customerId);
 
-                if (customerByUserId != null) {
-                    log.debug("Found CustomerProfile by User ID: {}", customerId);
-                    customer = customerByUserId;
+                if (customer == null) {
+                    log.debug("No CustomerProfile found for User ID: {}, creating new one", customerId);
+                    // Create a new CustomerProfile
+                    customer = new CustomerProfile();
+                    customer.setUser(user);
+                    customer.setMembershipStatus("Standard");
+                    customer.setTotalServices(0);
+
+                    // We need to set the ID explicitly to match database schema expectations
+                    customer.setCustomerId(customerId); // Set ID to match user ID
+
+                    // Save the profile first
+                    customer = customerProfileRepository.save(customer);
+                    log.debug("Created new CustomerProfile with ID: {}", customer.getCustomerId());
                 } else {
-                    log.debug("No CustomerProfile found for User ID: {}, checking if User exists", customerId);
-
-                    // Try to find user
-                    Optional<User> userOpt = userRepository.findById(customerId);
-
-                    if (userOpt.isPresent()) {
-                        User user = userOpt.get();
-                        log.debug("Found User with ID: {}, role: {}", customerId, user.getRole());
-
-                        // Create a new CustomerProfile for this user
-                        CustomerProfile newCustomer = new CustomerProfile();
-                        newCustomer.setUser(user);
-                        newCustomer.setMembershipStatus("Standard");
-                        newCustomer.setTotalServices(0);
-
-                        // Save the profile first to generate an ID
-                        customer = customerProfileRepository.save(newCustomer);
-                        log.debug("Created new CustomerProfile with ID: {}", customer.getCustomerId());
-                    } else {
-                        log.warn("No User found with ID: {}", customerId);
-                        return ResponseEntity.badRequest().body(Map.of("error",
-                                "No customer or user found with ID: " + customerId));
-                    }
+                    log.debug("Found existing CustomerProfile for User ID: {} with Customer ID: {}",
+                            customerId, customer.getCustomerId());
                 }
+            } else {
+                log.warn("No User found with ID: {}", customerId);
+                return ResponseEntity.badRequest().body(Map.of("error",
+                        "No user found with ID: " + customerId));
             }
 
             if (customer == null) {
@@ -131,8 +124,6 @@ public class VehicleController {
                 return ResponseEntity.badRequest().body(Map.of("error",
                         "Could not find or create customer profile for ID: " + customerId));
             }
-
-            log.debug("Using CustomerProfile with ID: {} for vehicle creation", customer.getCustomerId());
 
             // Check for duplicate registration number
             if (vehicleData.containsKey("registrationNumber")) {

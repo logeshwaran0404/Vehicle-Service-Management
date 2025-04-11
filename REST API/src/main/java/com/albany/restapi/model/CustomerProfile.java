@@ -17,7 +17,6 @@ import java.time.LocalDate;
 public class CustomerProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customerId;
 
     @OneToOne

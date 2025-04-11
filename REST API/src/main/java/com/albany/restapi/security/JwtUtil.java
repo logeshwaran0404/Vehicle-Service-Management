@@ -65,10 +65,10 @@ public class JwtUtil {
         if (userDetails instanceof com.albany.restapi.model.User) {
             com.albany.restapi.model.User user = (com.albany.restapi.model.User) userDetails;
 
-            // Add both role enum directly and as part of authorities
+            // Add both role enum directly and as part of authorities with ROLE_ prefix
             extraClaims.put("role", user.getRole().name());
 
-            // Also include all authorities
+            // Include all authorities with proper prefix
             Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
             if (!authorities.isEmpty()) {
                 String authoritiesStr = authorities.stream()
