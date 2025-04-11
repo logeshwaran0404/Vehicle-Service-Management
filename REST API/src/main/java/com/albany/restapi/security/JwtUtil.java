@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -60,21 +61,25 @@ public class JwtUtil {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
 
-        // Add user role to claims - using reflection to access the role field if needed
+        // Add user role to claims - using reflection to access the role field
         if (userDetails instanceof com.albany.restapi.model.User) {
             com.albany.restapi.model.User user = (com.albany.restapi.model.User) userDetails;
 
-            // Get the role from authorities
+            // Add both role enum directly and as part of authorities
+            extraClaims.put("role", user.getRole().name());
+
+            // Also include all authorities
             Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
             if (!authorities.isEmpty()) {
-                String authority = authorities.iterator().next().getAuthority();
-                // Remove "ROLE_" prefix if present for consistency
-                String role = authority.startsWith("ROLE_") ? authority.substring(5) : authority;
-                extraClaims.put("role", role);
-            } else {
-                // Fallback to using the role directly from the enum
-                extraClaims.put("role", user.getRole().name());
+                String authoritiesStr = authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(","));
+                extraClaims.put("authorities", authoritiesStr);
             }
+
+            // Add user ID for convenience
+            extraClaims.put("userId", user.getUserId());
+            extraClaims.put("name", user.getFirstName() + " " + user.getLastName());
         }
 
         return generateToken(extraClaims, userDetails);

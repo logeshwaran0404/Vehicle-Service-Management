@@ -35,7 +35,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/debug/**").permitAll() // New debug endpoint
+                        .requestMatchers("/api/debug/**").permitAll()
+                        .requestMatchers("/api/vehicles/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin", "ROLE_CUSTOMER", "ROLE_customer")
+                        .requestMatchers("/api/customers/{customerId}/vehicles/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin", "ROLE_CUSTOMER", "ROLE_customer")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -50,9 +54,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081", "http://127.0.0.1:8081",
-                "http://localhost:8082", "http://127.0.0.1:8082"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8081",
+                "http://127.0.0.1:8081",
+                "http://localhost:8082",
+                "http://127.0.0.1:8082"
+        ));
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"
+        ));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
