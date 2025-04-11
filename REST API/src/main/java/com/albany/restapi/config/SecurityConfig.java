@@ -36,10 +36,24 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/debug/**").permitAll()
+
+                        // Admin API paths
+                        .requestMatchers("/admin/api/vehicles/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin")
+                        .requestMatchers("/admin/api/customers/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin")
+                        .requestMatchers("/admin/api/service-requests/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin")
+                        .requestMatchers("/admin/api/service-advisors/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin")
+
+                        // Regular API paths
                         .requestMatchers("/api/vehicles/**").hasAnyAuthority(
                                 "ROLE_ADMIN", "ROLE_admin", "ROLE_CUSTOMER", "ROLE_customer")
                         .requestMatchers("/api/customers/{customerId}/vehicles/**").hasAnyAuthority(
                                 "ROLE_ADMIN", "ROLE_admin", "ROLE_CUSTOMER", "ROLE_customer")
+                        .requestMatchers("/api/service-requests/**").hasAnyAuthority(
+                                "ROLE_ADMIN", "ROLE_admin", "ROLE_CUSTOMER", "ROLE_customer", "ROLE_SERVICE_ADVISOR", "ROLE_serviceAdvisor")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

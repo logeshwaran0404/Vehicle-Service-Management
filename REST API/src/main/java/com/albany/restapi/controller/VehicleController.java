@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,7 +68,6 @@ public class VehicleController {
     public ResponseEntity<?> createVehicle(@RequestBody Map<String, Object> vehicleData) {
         try {
             log.debug("Received vehicle creation request with data: {}", vehicleData);
-            log.debug("Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
 
             // Extract customer ID
             Integer customerId = null;
@@ -83,46 +81,36 @@ public class VehicleController {
 
             log.debug("Attempting to create vehicle for customer ID: {}", customerId);
 
-            // First check if User exists
-            Optional<User> userOpt = userRepository.findById(customerId);
-            User user = null;
-            CustomerProfile customer = null;
+            // Find the customer profile directly
+            Optional<CustomerProfile> existingProfile = customerProfileRepository.findById(customerId);
+            CustomerProfile customer;
 
-            if (userOpt.isPresent()) {
-                user = userOpt.get();
+            if (existingProfile.isPresent()) {
+                // Use the existing profile
+                customer = existingProfile.get();
+                log.debug("Found existing CustomerProfile with ID: {}", customer.getCustomerId());
+            } else {
+                // No profile exists, need to create one from the user
+                Optional<User> userOpt = userRepository.findById(customerId);
+                if (!userOpt.isPresent()) {
+                    log.warn("No User found with ID: {}", customerId);
+                    return ResponseEntity.badRequest().body(Map.of("error",
+                            "No user found with ID: " + customerId));
+                }
+
+                User user = userOpt.get();
                 log.debug("Found User with ID: {}, role: {}", customerId, user.getRole());
 
-                // Look for existing CustomerProfile
-                customer = customerProfileRepository.findByUserId(customerId);
+                // Create a new CustomerProfile
+                customer = new CustomerProfile();
+                customer.setCustomerId(customerId); // Explicitly set the ID to match user ID
+                customer.setUser(user);
+                customer.setMembershipStatus("Standard");
+                customer.setTotalServices(0);
 
-                if (customer == null) {
-                    log.debug("No CustomerProfile found for User ID: {}, creating new one", customerId);
-                    // Create a new CustomerProfile
-                    customer = new CustomerProfile();
-                    customer.setUser(user);
-                    customer.setMembershipStatus("Standard");
-                    customer.setTotalServices(0);
-
-                    // We need to set the ID explicitly to match database schema expectations
-                    customer.setCustomerId(customerId); // Set ID to match user ID
-
-                    // Save the profile first
-                    customer = customerProfileRepository.save(customer);
-                    log.debug("Created new CustomerProfile with ID: {}", customer.getCustomerId());
-                } else {
-                    log.debug("Found existing CustomerProfile for User ID: {} with Customer ID: {}",
-                            customerId, customer.getCustomerId());
-                }
-            } else {
-                log.warn("No User found with ID: {}", customerId);
-                return ResponseEntity.badRequest().body(Map.of("error",
-                        "No user found with ID: " + customerId));
-            }
-
-            if (customer == null) {
-                log.error("Failed to find or create customer profile for ID: {}", customerId);
-                return ResponseEntity.badRequest().body(Map.of("error",
-                        "Could not find or create customer profile for ID: " + customerId));
+                // Save the customer profile first
+                customer = customerProfileRepository.save(customer);
+                log.debug("Created new CustomerProfile with ID: {}", customer.getCustomerId());
             }
 
             // Check for duplicate registration number
