@@ -41,9 +41,9 @@ public class VehicleController {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make the API call to the backend
+            // Make the API call to the backend - use correct admin endpoint
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/customers/" + customerId + "/vehicles",
+                    apiBaseUrl + "/admin/api/customers/" + customerId + "/vehicles",
                     HttpMethod.GET,
                     entity,
                     Object.class
@@ -63,7 +63,7 @@ public class VehicleController {
      * Create a new vehicle for a customer
      */
     @PostMapping("/customers/{customerId}/vehicles")
-    public ResponseEntity<?> createVehicle(
+    public ResponseEntity<?> createVehicleForCustomer(
             @PathVariable Integer customerId,
             @RequestBody Map<String, Object> vehicleData,
             @RequestHeader(value = "Authorization", required = false) String authHeader,
@@ -96,9 +96,9 @@ public class VehicleController {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(vehicleData, headers);
 
-            // Make the API call to the backend
+            // Make the API call to the backend - use correct admin endpoint
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/vehicles",
+                    apiBaseUrl + "/admin/api/customers/" + customerId + "/vehicles",
                     HttpMethod.POST,
                     entity,
                     Object.class
@@ -137,9 +137,9 @@ public class VehicleController {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make the API call to the backend
+            // Make the API call to the backend - use correct admin endpoint
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/vehicles/" + id,
+                    apiBaseUrl + "/admin/api/vehicles/" + id,
                     HttpMethod.GET,
                     entity,
                     Object.class
@@ -180,9 +180,9 @@ public class VehicleController {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(vehicleData, headers);
 
-            // Make the API call to the backend
+            // Make the API call to the backend - use correct admin endpoint
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/vehicles/" + id,
+                    apiBaseUrl + "/admin/api/vehicles/" + id,
                     HttpMethod.PUT,
                     entity,
                     Object.class
@@ -221,9 +221,9 @@ public class VehicleController {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make the API call to the backend
+            // Make the API call to the backend - use correct admin endpoint
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/vehicles/" + id,
+                    apiBaseUrl + "/admin/api/vehicles/" + id,
                     HttpMethod.DELETE,
                     entity,
                     Object.class
