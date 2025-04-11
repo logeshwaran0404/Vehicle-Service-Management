@@ -86,11 +86,16 @@ public class AdminController {
     /**
      * Get all vehicles for a specific customer - admin version
      */
+    // Methods related to vehicles in AdminController.java
+
+    /**
+     * Get all vehicles for a specific customer - admin version
+     */
     @GetMapping("/customers/{customerId}/vehicles")
     @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<?> getVehiclesForCustomer(@PathVariable Integer customerId) {
         log.info("Admin API: Getting vehicles for customer ID: {}", customerId);
-        
+
         try {
             List<Vehicle> vehicles = vehicleRepository.findByCustomer_CustomerId(customerId);
             return ResponseEntity.ok(vehicles);
@@ -111,13 +116,13 @@ public class AdminController {
     public ResponseEntity<?> createVehicleForCustomer(
             @PathVariable Integer customerId,
             @RequestBody Map<String, Object> vehicleData) {
-        
+
         log.info("Admin API: Creating vehicle for customer ID: {}", customerId);
-        
+
         // Add the customerId to the vehicle data
         vehicleData.put("customerId", customerId);
-        
-        // Delegate to the fixed createVehicle method
+
+        // Delegate to the vehicle controller's createVehicle method
         return vehicleController.createVehicle(vehicleData);
     }
 
@@ -139,7 +144,7 @@ public class AdminController {
     public ResponseEntity<?> updateVehicle(
             @PathVariable Integer id,
             @RequestBody Map<String, Object> vehicleData) {
-        
+
         log.info("Admin API: Updating vehicle with ID: {}", id);
         return vehicleController.updateVehicle(id, vehicleData);
     }

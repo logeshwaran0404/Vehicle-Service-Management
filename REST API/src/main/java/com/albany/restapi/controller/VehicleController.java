@@ -90,7 +90,7 @@ public class VehicleController {
                 customer = existingProfile.get();
                 log.debug("Found existing CustomerProfile with ID: {}", customer.getCustomerId());
             } else {
-                // No profile exists, need to create one from the user
+                // Check if there's a User with this ID but no CustomerProfile yet
                 Optional<User> userOpt = userRepository.findById(customerId);
                 if (!userOpt.isPresent()) {
                     log.warn("No User found with ID: {}", customerId);
@@ -101,9 +101,9 @@ public class VehicleController {
                 User user = userOpt.get();
                 log.debug("Found User with ID: {}, role: {}", customerId, user.getRole());
 
-                // Create a new CustomerProfile
+                // Create a new CustomerProfile - we must save this FIRST before creating vehicle
                 customer = new CustomerProfile();
-                customer.setCustomerId(customerId); // Explicitly set the ID to match user ID
+                customer.setCustomerId(customerId); // Explicitly set ID to match user ID
                 customer.setUser(user);
                 customer.setMembershipStatus("Standard");
                 customer.setTotalServices(0);
@@ -125,7 +125,7 @@ public class VehicleController {
 
             // Create new vehicle
             Vehicle vehicle = new Vehicle();
-            vehicle.setCustomer(customer);
+            vehicle.setCustomer(customer); // Set customer object, not just ID
 
             // Set vehicle properties from request data
             if (vehicleData.containsKey("brand")) {
