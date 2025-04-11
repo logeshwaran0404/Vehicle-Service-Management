@@ -81,7 +81,8 @@ public class VehicleController {
 
             HttpHeaders headers = new HttpHeaders();
             // Ensure the "Bearer " prefix is included
-            headers.set("Authorization", "Bearer " + finalToken);
+            headers.set("Authorization", finalToken.startsWith("Bearer ") ?
+                    finalToken : "Bearer " + finalToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             // Debug logging
