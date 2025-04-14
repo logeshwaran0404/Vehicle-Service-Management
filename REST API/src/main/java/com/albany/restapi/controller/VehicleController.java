@@ -49,6 +49,23 @@ public class VehicleController {
     }
 
     /**
+     * Create a new vehicle for a specific customer
+     */
+    @PostMapping("/customers/{customerId}/vehicles")
+    @PreAuthorize("hasAnyRole('ADMIN', 'admin', 'CUSTOMER', 'customer')")
+    @Transactional
+    public ResponseEntity<?> createVehicleForCustomer(
+            @PathVariable Integer customerId,
+            @RequestBody Map<String, Object> vehicleData) {
+
+        // Add the customerId to the vehicle data
+        vehicleData.put("customerId", customerId);
+
+        // Delegate to the existing createVehicle method
+        return createVehicle(vehicleData);
+    }
+
+    /**
      * Get vehicle by ID
      */
     @GetMapping("/vehicles/{id}")
