@@ -41,9 +41,9 @@ public class VehicleController {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make the API call to the backend - use correct admin endpoint
+            // FIXED: Correct API URL - remove duplicate paths
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/admin/api/customers/" + customerId + "/vehicles",
+                    apiBaseUrl + "/customers/" + customerId + "/vehicles",
                     HttpMethod.GET,
                     entity,
                     Object.class
@@ -96,9 +96,9 @@ public class VehicleController {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(vehicleData, headers);
 
-            // Make the API call to the backend - use correct admin endpoint
+            // FIXED: Correct API URL - remove duplicate paths
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/admin/api/customers/" + customerId + "/vehicles",
+                    apiBaseUrl + "/customers/" + customerId + "/vehicles",
                     HttpMethod.POST,
                     entity,
                     Object.class
@@ -114,9 +114,7 @@ public class VehicleController {
         }
     }
 
-    /**
-     * Get vehicle by ID
-     */
+    // Similarly, fix all other methods in this controller...
     @GetMapping("/vehicles/{id}")
     public ResponseEntity<?> getVehicleById(
             @PathVariable Integer id,
@@ -137,9 +135,9 @@ public class VehicleController {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make the API call to the backend - use correct admin endpoint
+            // FIXED: Correct API URL - remove duplicate paths
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/admin/api/vehicles/" + id,
+                    apiBaseUrl + "/vehicles/" + id,
                     HttpMethod.GET,
                     entity,
                     Object.class
@@ -155,9 +153,6 @@ public class VehicleController {
         }
     }
 
-    /**
-     * Update a vehicle
-     */
     @PutMapping("/vehicles/{id}")
     public ResponseEntity<?> updateVehicle(
             @PathVariable Integer id,
@@ -180,9 +175,9 @@ public class VehicleController {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(vehicleData, headers);
 
-            // Make the API call to the backend - use correct admin endpoint
+            // FIXED: Correct API URL - remove duplicate paths
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/admin/api/vehicles/" + id,
+                    apiBaseUrl + "/vehicles/" + id,
                     HttpMethod.PUT,
                     entity,
                     Object.class
@@ -198,9 +193,6 @@ public class VehicleController {
         }
     }
 
-    /**
-     * Delete a vehicle
-     */
     @DeleteMapping("/vehicles/{id}")
     public ResponseEntity<?> deleteVehicle(
             @PathVariable Integer id,
@@ -221,9 +213,9 @@ public class VehicleController {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make the API call to the backend - use correct admin endpoint
+            // FIXED: Correct API URL - remove duplicate paths
             ResponseEntity<Object> response = restTemplate.exchange(
-                    apiBaseUrl + "/admin/api/vehicles/" + id,
+                    apiBaseUrl + "/vehicles/" + id,
                     HttpMethod.DELETE,
                     entity,
                     Object.class
