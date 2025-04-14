@@ -2183,6 +2183,8 @@
                     }
                     // Hide new vehicle form if it's open
                     document.getElementById('newVehicleForm').style.display = 'none';
+                    // Remove required attributes from new vehicle form
+                    removeRequiredFromVehicleForm();
                 }
             });
         }
@@ -2192,6 +2194,8 @@
         if (addNewVehicleBtn) {
             addNewVehicleBtn.addEventListener('click', function() {
                 document.getElementById('newVehicleForm').style.display = 'block';
+                // Add required attributes when form is shown
+                addRequiredToVehicleForm();
             });
         }
 
@@ -2200,6 +2204,8 @@
         if (cancelNewVehicleBtn) {
             cancelNewVehicleBtn.addEventListener('click', function() {
                 document.getElementById('newVehicleForm').style.display = 'none';
+                // Remove required attributes when form is hidden
+                removeRequiredToVehicleForm();
             });
         }
 
@@ -2226,6 +2232,25 @@
                 assignServiceAdvisor();
             });
         }
+    }
+
+    // Helper functions to add/remove required attributes
+    function addRequiredToVehicleForm() {
+        // Add required attribute to all form elements
+        document.getElementById('vehicleBrand').setAttribute('required', 'required');
+        document.getElementById('vehicleModel').setAttribute('required', 'required');
+        document.getElementById('vehicleRegNumber').setAttribute('required', 'required');
+        document.getElementById('vehicleCategory').setAttribute('required', 'required');
+        document.getElementById('vehicleYear').setAttribute('required', 'required');
+    }
+
+    function removeRequiredFromVehicleForm() {
+        // Remove required attribute from all form elements
+        document.getElementById('vehicleBrand').removeAttribute('required');
+        document.getElementById('vehicleModel').removeAttribute('required');
+        document.getElementById('vehicleRegNumber').removeAttribute('required');
+        document.getElementById('vehicleCategory').removeAttribute('required');
+        document.getElementById('vehicleYear').removeAttribute('required');
     }
 
     // API Functions
@@ -2433,60 +2458,60 @@
             const row = document.createElement('tr');
             row.className = 'active-page';
             row.innerHTML = `
-            <td>REQ-${request.requestId}</td>
-            <td>
-                <div class="vehicle-info">
-                    <div class="vehicle-icon">
-                        <i class="fas fa-${request.vehicleCategory === 'Bike' ? 'motorcycle' : 'car-side'}"></i>
-                    </div>
-                    <div class="vehicle-details">
-                        <h5>${request.vehicleName || request.vehicleBrand + ' ' + request.vehicleModel}</h5>
-                        <p>${request.registrationNumber}</p>
-                    </div>
+        <td>REQ-${request.requestId}</td>
+        <td>
+            <div class="vehicle-info">
+                <div class="vehicle-icon">
+                    <i class="fas fa-${request.vehicleCategory === 'Bike' ? 'motorcycle' : 'car-side'}"></i>
                 </div>
-            </td>
-            <td>
-                <div class="person-info">
-                    <div class="person-details">
-                        <h5>${request.customerName}</h5>
-                        <p>${request.customerEmail || ''}</p>
-                    </div>
+                <div class="vehicle-details">
+                    <h5>${request.vehicleName || request.vehicleBrand + ' ' + request.vehicleModel}</h5>
+                    <p>${request.registrationNumber}</p>
                 </div>
-            </td>
-            <td>
-                <span class="membership-badge membership-${membershipStatus.toLowerCase()}">
-                    <i class="fas fa-${membershipStatus === 'Premium' ? 'crown' : 'user'}"></i>
-                    ${membershipStatus}
-                </span>
-            </td>
-            <td>${request.serviceType}</td>
-            <td>
-                <span class="status-badge status-${request.status.toLowerCase()}">
-                    <i class="fas fa-${
+            </div>
+        </td>
+        <td>
+            <div class="person-info">
+                <div class="person-details">
+                    <h5>${request.customerName}</h5>
+                    <p>${request.customerEmail || ''}</p>
+                </div>
+            </div>
+        </td>
+        <td>
+            <span class="membership-badge membership-${membershipStatus.toLowerCase()}">
+                <i class="fas fa-${membershipStatus === 'Premium' ? 'crown' : 'user'}"></i>
+                ${membershipStatus}
+            </span>
+        </td>
+        <td>${request.serviceType}</td>
+        <td>
+            <span class="status-badge status-${request.status.toLowerCase()}">
+                <i class="fas fa-${
                 request.status === 'Received' ? 'clock' :
                     request.status === 'Diagnosis' ? 'stethoscope' :
                         request.status === 'Repair' ? 'wrench' :
                             'check-circle'
             }"></i>
-                    ${request.status}
-                </span>
-            </td>
-            <td>${formatDate(request.deliveryDate)}</td>
-            <td>${request.serviceAdvisorName || 'Not Assigned'}</td>
-            <td class="table-actions-cell">
-                <button class="btn-table-action view-btn" title="View Details" onclick="showServiceRequestDetails(${request.requestId})">
-                    <i class="fas fa-eye"></i>
-                </button>
-                ${!request.serviceAdvisorId ?
+                ${request.status}
+            </span>
+        </td>
+        <td>${formatDate(request.deliveryDate)}</td>
+        <td>${request.serviceAdvisorName || 'Not Assigned'}</td>
+        <td class="table-actions-cell">
+            <button class="btn-table-action view-btn" title="View Details" onclick="showServiceRequestDetails(${request.requestId})">
+                <i class="fas fa-eye"></i>
+            </button>
+            ${!request.serviceAdvisorId ?
                 `<button class="btn-assign" title="Assign Advisor" onclick="showAssignAdvisorModal(${request.requestId})">
-                        <i class="fas fa-user-plus"></i> Assign
-                    </button>` :
+                    <i class="fas fa-user-plus"></i> Assign
+                </button>` :
                 `<button class="btn-table-action edit-btn" title="Edit Request">
-                        <i class="fas fa-edit"></i>
-                    </button>`
+                    <i class="fas fa-edit"></i>
+                </button>`
             }
-            </td>
-        `;
+        </td>
+    `;
 
             tableBody.appendChild(row);
         });
@@ -2512,12 +2537,12 @@
                 const filterDiv = document.createElement('div');
                 filterDiv.className = 'membership-filters ms-2';
                 filterDiv.innerHTML = `
-                <div class="btn-group" role="group" aria-label="Membership filters">
-                    <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter="All">All</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="Standard">Standard</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="Premium">Premium</button>
-                </div>
-            `;
+            <div class="btn-group" role="group" aria-label="Membership filters">
+                <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter="All">All</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="Standard">Standard</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="Premium">Premium</button>
+            </div>
+        `;
 
                 tableActions.appendChild(filterDiv);
 
@@ -2543,30 +2568,30 @@
             const style = document.createElement('style');
             style.id = 'membership-filter-styles';
             style.textContent = `
-            .membership-filters {
-                display: flex;
-                align-items: center;
-            }
+        .membership-filters {
+            display: flex;
+            align-items: center;
+        }
 
-            .membership-filters .btn-group {
-                box-shadow: var(--shadow-sm);
-                border-radius: var(--radius-lg);
-                overflow: hidden;
-            }
+        .membership-filters .btn-group {
+            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
 
-            .membership-filters .btn {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.85rem;
-                font-weight: 500;
-                border-radius: 0;
-            }
+        .membership-filters .btn {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 0;
+        }
 
-            .membership-filters .btn.active {
-                background-color: var(--wine);
-                color: white;
-                border-color: var(--wine);
-            }
-        `;
+        .membership-filters .btn.active {
+            background-color: var(--wine);
+            color: white;
+            border-color: var(--wine);
+        }
+    `;
             document.head.appendChild(style);
         }
     }
@@ -2804,6 +2829,9 @@
                 // Hide the form
                 document.getElementById('newVehicleForm').style.display = 'none';
 
+                // Remove required attributes
+                removeRequiredFromVehicleForm();
+
                 // Clear form fields
                 document.getElementById('vehicleBrand').value = '';
                 document.getElementById('vehicleModel').value = '';
@@ -2914,11 +2942,11 @@
 
         if (!serviceAdvisors || serviceAdvisors.length === 0) {
             advisorsList.innerHTML = `
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                No service advisors available. Please add service advisors first.
-            </div>
-        `;
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No service advisors available. Please add service advisors first.
+        </div>
+    `;
             return;
         }
 
@@ -2944,40 +2972,40 @@
                 (advisor.lastName ? advisor.lastName.charAt(0) : '');
 
             html += `
-            <div class="advisor-card" data-advisor-id="${advisor.advisorId || advisor.id}">
-                <div class="advisor-avatar">
-                    ${initials || 'SA'}
+        <div class="advisor-card" data-advisor-id="${advisor.advisorId || advisor.id}">
+            <div class="advisor-avatar">
+                ${initials || 'SA'}
+            </div>
+            <div class="advisor-info">
+                <div class="advisor-name">${name}</div>
+                <div class="advisor-meta">
+                    <div class="advisor-stat">
+                        <i class="fas fa-clipboard-list"></i>
+                        ${advisor.activeServices || 0} active requests
+                    </div>
+                    <div class="advisor-stat">
+                        <i class="fas fa-id-badge"></i>
+                        ${advisor.formattedId || `SA-${String(advisor.advisorId || 0).padStart(3, '0')}`}
+                    </div>
                 </div>
-                <div class="advisor-info">
-                    <div class="advisor-name">${name}</div>
-                    <div class="advisor-meta">
-                        <div class="advisor-stat">
-                            <i class="fas fa-clipboard-list"></i>
-                            ${advisor.activeServices || 0} active requests
-                        </div>
-                        <div class="advisor-stat">
-                            <i class="fas fa-id-badge"></i>
-                            ${advisor.formattedId || `SA-${String(advisor.advisorId || 0).padStart(3, '0')}`}
+                <div class="advisor-services">
+                    <i class="fas fa-tools"></i>
+                    ${advisor.specialization || 'General Service'}
+                </div>
+                <div class="advisor-workload">
+                    <div class="progress">
+                        <div class="progress-bar ${workloadClass}" role="progressbar"
+                            style="width: ${workloadPercentage}%"
+                            aria-valuenow="${workloadPercentage}" aria-valuemin="0" aria-valuemax="100">
                         </div>
                     </div>
-                    <div class="advisor-services">
-                        <i class="fas fa-tools"></i>
-                        ${advisor.specialization || 'General Service'}
-                    </div>
-                    <div class="advisor-workload">
-                        <div class="progress">
-                            <div class="progress-bar ${workloadClass}" role="progressbar"
-                                style="width: ${workloadPercentage}%"
-                                aria-valuenow="${workloadPercentage}" aria-valuemin="0" aria-valuemax="100">
-                            </div>
-                        </div>
-                        <div class="workload-text">
-                            Workload: ${workloadPercentage}%
-                        </div>
+                    <div class="workload-text">
+                        Workload: ${workloadPercentage}%
                     </div>
                 </div>
             </div>
-        `;
+        </div>
+    `;
         });
 
         advisorsList.innerHTML = html;
@@ -3063,16 +3091,16 @@
         // Set status with appropriate badge
         const statusElement = document.getElementById('viewStatus');
         statusElement.innerHTML = `
-        <span class="status-badge status-${request.status.toLowerCase()}">
-            <i class="fas fa-${
+    <span class="status-badge status-${request.status.toLowerCase()}">
+        <i class="fas fa-${
             request.status === 'Received' ? 'clock' :
                 request.status === 'Diagnosis' ? 'stethoscope' :
                     request.status === 'Repair' ? 'wrench' :
                         'check-circle'
         }"></i>
-            ${request.status}
-        </span>
-    `;
+        ${request.status}
+    </span>
+`;
 
         document.getElementById('viewCreatedDate').textContent = formatDate(request.createdAt || new Date().toISOString());
         document.getElementById('viewVehicleName').textContent = request.vehicleName || `${request.vehicleBrand} ${request.vehicleModel}`;
@@ -3085,11 +3113,11 @@
         const membershipElement = document.getElementById('viewMembership');
         const membershipStatus = request.membershipStatus || 'Standard';
         membershipElement.innerHTML = `
-        <span class="membership-badge membership-${membershipStatus.toLowerCase()}">
-            <i class="fas fa-${membershipStatus === 'Premium' ? 'crown' : 'user'}"></i>
-            ${membershipStatus}
-        </span>
-    `;
+    <span class="membership-badge membership-${membershipStatus.toLowerCase()}">
+        <i class="fas fa-${membershipStatus === 'Premium' ? 'crown' : 'user'}"></i>
+        ${membershipStatus}
+    </span>
+`;
 
         document.getElementById('viewServiceType').textContent = request.serviceType;
         document.getElementById('viewDeliveryDate').textContent = formatDate(request.deliveryDate);
@@ -3131,11 +3159,11 @@
             totalCost += itemTotal;
 
             row.innerHTML = `
-            <td>${material.name}</td>
-            <td>${material.quantity}</td>
-            <td>₹${material.unitPrice.toFixed(2)}</td>
-            <td>₹${itemTotal.toFixed(2)}</td>
-        `;
+        <td>${material.name}</td>
+        <td>${material.quantity}</td>
+        <td>₹${material.unitPrice.toFixed(2)}</td>
+        <td>₹${itemTotal.toFixed(2)}</td>
+    `;
 
             tableBody.appendChild(row);
         });
@@ -3144,9 +3172,9 @@
         const totalRow = document.createElement('tr');
         totalRow.className = 'fw-bold';
         totalRow.innerHTML = `
-        <td colspan="3" class="text-end">Total</td>
-        <td>₹${totalCost.toFixed(2)}</td>
-    `;
+    <td colspan="3" class="text-end">Total</td>
+    <td>₹${totalCost.toFixed(2)}</td>
+`;
 
         tableBody.appendChild(totalRow);
     }
@@ -3171,16 +3199,16 @@
         // Create toast element
         const toastId = 'toast-' + Date.now();
         const toastHTML = `
-        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
-            <div class="toast-header">
-                <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+        <div class="toast-header">
+            <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-    `;
+        <div class="toast-body">
+            ${message}
+        </div>
+    </div>
+`;
 
         toastContainer.insertAdjacentHTML('beforeend', toastHTML);
 
