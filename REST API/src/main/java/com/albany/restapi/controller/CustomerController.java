@@ -29,11 +29,11 @@ public class CustomerController {
     @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<List<Map<String, Object>>> getAllCustomers() {
         List<CustomerProfile> customers = customerProfileRepository.findAllActive();
-        
+
         List<Map<String, Object>> response = customers.stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -41,40 +41,48 @@ public class CustomerController {
     @PreAuthorize("hasAnyRole('ADMIN', 'admin')")
     public ResponseEntity<Map<String, Object>> createCustomer(@RequestBody Map<String, Object> request) {
         try {
+            // Check if email already exists
+            String email = (String) request.get("email");
+            if (email != null && userRepository.existsByEmail(email)) {
+                return ResponseEntity.badRequest().body(Map.of("error",
+                        "A user with this email already exists. Please use a different email address."));
+            }
+
             // Create User entity
             User user = new User();
             user.setFirstName((String) request.get("firstName"));
             user.setLastName((String) request.get("lastName"));
-            user.setEmail((String) request.get("email"));
+            user.setEmail(email);
             user.setPhoneNumber((String) request.get("phoneNumber"));
             user.setRole(Role.customer);
             user.setActive(true);
-            
+
             // Generate a temporary password
             String tempPassword = "Customer" + System.currentTimeMillis() % 10000;
             user.setPassword(passwordEncoder.encode(tempPassword));
-            
+
             // Save the user
             User savedUser = userRepository.save(user);
-            
+
             // Create CustomerProfile
             CustomerProfile profile = new CustomerProfile();
+            profile.setCustomerId(savedUser.getUserId()); // Set customerId to match userId
             profile.setUser(savedUser);
             profile.setStreet((String) request.get("street"));
             profile.setCity((String) request.get("city"));
             profile.setState((String) request.get("state"));
             profile.setPostalCode((String) request.get("postalCode"));
             profile.setMembershipStatus((String) request.get("membershipStatus"));
-            
+
             // Save the profile
             CustomerProfile savedProfile = customerProfileRepository.save(profile);
-            
+
             // Return the created customer
             Map<String, Object> response = convertToResponseDto(savedProfile);
             response.put("tempPassword", tempPassword); // Include the temp password in response
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -94,30 +102,42 @@ public class CustomerController {
     public ResponseEntity<Map<String, Object>> updateCustomer(
             @PathVariable Integer id,
             @RequestBody Map<String, Object> request) {
-        
-        return customerProfileRepository.findById(id)
-                .map(profile -> {
-                    // Update CustomerProfile
-                    profile.setStreet((String) request.get("street"));
-                    profile.setCity((String) request.get("city"));
-                    profile.setState((String) request.get("state"));
-                    profile.setPostalCode((String) request.get("postalCode"));
-                    profile.setMembershipStatus((String) request.get("membershipStatus"));
-                    
-                    // Update User
-                    User user = profile.getUser();
-                    user.setFirstName((String) request.get("firstName"));
-                    user.setLastName((String) request.get("lastName"));
-                    user.setEmail((String) request.get("email"));
-                    user.setPhoneNumber((String) request.get("phoneNumber"));
-                    
-                    // Save updates
-                    userRepository.save(user);
-                    CustomerProfile updatedProfile = customerProfileRepository.save(profile);
-                    
-                    return ResponseEntity.ok(convertToResponseDto(updatedProfile));
-                })
-                .orElse(ResponseEntity.notFound().build());
+
+        try {
+            CustomerProfile profile = customerProfileRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+            // Check if email is being changed to one that already exists
+            String newEmail = (String) request.get("email");
+            String currentEmail = profile.getUser().getEmail();
+
+            if (newEmail != null && !newEmail.equals(currentEmail) && userRepository.existsByEmail(newEmail)) {
+                return ResponseEntity.badRequest().body(Map.of("error",
+                        "A user with this email already exists. Please use a different email address."));
+            }
+
+            // Update CustomerProfile
+            profile.setStreet((String) request.get("street"));
+            profile.setCity((String) request.get("city"));
+            profile.setState((String) request.get("state"));
+            profile.setPostalCode((String) request.get("postalCode"));
+            profile.setMembershipStatus((String) request.get("membershipStatus"));
+
+            // Update User
+            User user = profile.getUser();
+            user.setFirstName((String) request.get("firstName"));
+            user.setLastName((String) request.get("lastName"));
+            user.setEmail(newEmail);
+            user.setPhoneNumber((String) request.get("phoneNumber"));
+
+            // Save updates
+            userRepository.save(user);
+            CustomerProfile updatedProfile = customerProfileRepository.save(profile);
+
+            return ResponseEntity.ok(convertToResponseDto(updatedProfile));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -129,7 +149,7 @@ public class CustomerController {
                     User user = profile.getUser();
                     user.setActive(false);
                     userRepository.save(user);
-                    
+
                     return ResponseEntity.noContent().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -137,9 +157,9 @@ public class CustomerController {
 
     private Map<String, Object> convertToResponseDto(CustomerProfile profile) {
         Map<String, Object> dto = new HashMap<>();
-        
+
         User user = profile.getUser();
-        
+
         dto.put("customerId", profile.getCustomerId());
         dto.put("userId", user.getUserId());
         dto.put("firstName", user.getFirstName());
@@ -154,7 +174,7 @@ public class CustomerController {
         dto.put("lastServiceDate", profile.getLastServiceDate());
         dto.put("membershipStatus", profile.getMembershipStatus());
         dto.put("isActive", user.isActive());
-        
+
         return dto;
     }
 }
