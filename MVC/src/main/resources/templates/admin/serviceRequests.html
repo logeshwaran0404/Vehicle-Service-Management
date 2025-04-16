@@ -2204,8 +2204,8 @@
         if (cancelNewVehicleBtn) {
             cancelNewVehicleBtn.addEventListener('click', function() {
                 document.getElementById('newVehicleForm').style.display = 'none';
-                // Remove required attributes when form is hidden
-                removeRequiredToVehicleForm();
+                // Fixed function name - was calling removeRequiredToVehicleForm
+                removeRequiredFromVehicleForm();
             });
         }
 
@@ -2276,7 +2276,7 @@
         showSpinner();
 
         // API call to get service requests
-        fetch('/admin/api/service-requests', {
+        fetch('/admin/service-requests/api/all', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -2368,7 +2368,7 @@
     }
 
     function loadServiceAdvisors() {
-        fetch('/admin/api/service-advisors', {
+        fetch('/admin/service-advisors/api/advisors', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -2867,7 +2867,8 @@
 
         showSpinner();
 
-        fetch('/admin/api/service-requests', {
+        // Fixed URL - use direct path instead of apiBaseUrl variable
+        fetch('/admin/service-requests/api', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -3032,7 +3033,7 @@
 
         showSpinner();
 
-        fetch(`/admin/api/service-requests/${requestId}/assign?advisorId=${advisorId}`, {
+        fetch(`/admin/service-requests/api/${requestId}/assign?advisorId=${advisorId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
